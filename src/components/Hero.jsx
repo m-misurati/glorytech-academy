@@ -38,21 +38,7 @@ export default function Hero() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, x: -28 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.7 }} className="relative order-2 mx-auto w-full max-w-[560px] self-end lg:order-1">
-          <img src="/assets/mohamed-bashir-hero.png" alt="المهندس محمد بشير المصراتي" className="relative z-10 mx-auto h-[520px] w-full object-contain object-bottom sm:h-[650px]" />
-
-          <motion.div animate={{ y: [0, -7, 0], rotate: [-3, -1, -3] }} transition={{ repeat: Infinity, duration: 4.2, ease: 'easeInOut' }} className="absolute left-2 top-[24%] z-20 rounded-2xl bg-white p-3 shadow-xl shadow-slate-900/10 sm:left-1">
-            <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#dff8f2] text-xl">✓</span>
-              <span><strong className="block text-sm text-slate-900">شرح عملي</strong><small className="font-bold text-slate-500">خطوة بخطوة</small></span>
-            </div>
-          </motion.div>
-
-          <motion.div animate={{ y: [0, 8, 0], rotate: [2, 0, 2] }} transition={{ repeat: Infinity, duration: 4.8, ease: 'easeInOut' }} className="absolute bottom-[18%] right-0 z-20 rounded-2xl bg-white p-3 shadow-xl shadow-slate-900/10 sm:right-1">
-            <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#fff0e9] text-[#ff7438]">▶</span>
-              <span><strong className="block text-sm text-slate-900">تعلّم من أي مكان</strong><small className="font-bold text-slate-500">داخل المنصة</small></span>
-            </div>
-          </motion.div>
+          <img src="/assets/mohamed-bashir-cutout.png" alt="المهندس محمد بشير المصراتي" className="relative z-10 mx-auto h-[520px] w-full object-contain object-bottom sm:h-[650px]" />
         </motion.div>
       </div>
 

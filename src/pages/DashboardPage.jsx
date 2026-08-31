@@ -8,7 +8,7 @@ import { getUserProgress } from '../lib/supabase';
 
 export default function DashboardPage() {
   const { user, isDemo } = useAuth();
-  const { courses } = useCatalog();
+  const { availableCourses } = useCatalog();
   const [progressRows, setProgressRows] = useState([]);
 
   useEffect(() => {
@@ -18,12 +18,12 @@ export default function DashboardPage() {
   }, [user?.id]);
 
   const completedLessons = progressRows.filter((row) => row.completed_at).length;
-  const courseProgress = useMemo(() => Object.fromEntries(courses.map((course) => {
+  const courseProgress = useMemo(() => Object.fromEntries(availableCourses.map((course) => {
     const ids = new Set(course.modules.flatMap((module) => module.lessons.map((lesson) => lesson.id)));
     const completed = progressRows.filter((row) => row.completed_at && ids.has(row.lesson_id)).length;
-    return [course.id, Math.round((completed / course.lessonsCount) * 100)];
-  })), [progressRows]);
-  const displayName = user?.email?.split('@')[0] || 'طالب GloryTech';
+    return [course.id, course.lessonsCount ? Math.round((completed / course.lessonsCount) * 100) : 0];
+  })), [availableCourses, progressRows]);
+  const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'طالب GloryTech';
 
   return (
     <div className="min-h-screen bg-[#f7f9fb]">
@@ -38,13 +38,13 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-7 grid gap-4 sm:grid-cols-3">
-          {[{ icon: BookOpen, value: courses.length, label: 'كورسات متاحة', color: 'teal' }, { icon: CheckCircle2, value: completedLessons, label: 'دروس مكتملة', color: 'orange' }, { icon: Clock3, value: '14h', label: 'محتوى تعليمي', color: 'dark' }].map((stat) => (
+          {[{ icon: BookOpen, value: availableCourses.length, label: 'كورسات متاحة', color: 'teal' }, { icon: CheckCircle2, value: completedLessons, label: 'دروس مكتملة', color: 'orange' }, { icon: Clock3, value: '14h', label: 'محتوى تعليمي', color: 'dark' }].map((stat) => (
             <div key={stat.label} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5"><span className={`${stat.color === 'orange' ? 'bg-[#fff0e9] text-[#ff7438]' : stat.color === 'dark' ? 'bg-slate-100 text-slate-800' : 'bg-[#dff8f2] text-[#1bb89d]'} grid h-12 w-12 place-items-center rounded-xl`}><stat.icon className="h-6 w-6" /></span><div><strong className="block text-2xl font-black">{stat.value}</strong><span className="text-xs font-bold text-slate-500">{stat.label}</span></div></div>
           ))}
         </div>
 
-        <div className="mt-12 flex items-end justify-between gap-5"><div><span className="text-xs font-black text-[#ff7438]">كورساتك</span><h2 className="mt-2 text-3xl font-black">واصل من حيث توقفت</h2></div><span className="text-sm font-bold text-slate-400">{courses.length} حالياً</span></div>
-        <div className="mt-7 grid gap-7 lg:grid-cols-2">{courses.map((course) => <CourseCard key={course.id} course={course} dashboard progress={courseProgress[course.id] || 0} />)}</div>
+        <div className="mt-12 flex items-end justify-between gap-5"><div><span className="text-xs font-black text-[#ff7438]">كورساتك</span><h2 className="mt-2 text-3xl font-black">واصل من حيث توقفت</h2></div><span className="text-sm font-bold text-slate-400">{availableCourses.length} حالياً</span></div>
+        <div className="mt-7 grid gap-7 lg:grid-cols-2">{availableCourses.map((course) => <CourseCard key={course.id} course={course} dashboard progress={courseProgress[course.id] || 0} />)}</div>
       </main>
     </div>
   );

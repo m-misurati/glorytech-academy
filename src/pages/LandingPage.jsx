@@ -54,7 +54,7 @@ export default function LandingPage() {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return courses;
     return courses.filter((course) => `${course.title} ${course.description}`.toLowerCase().includes(normalized));
-  }, [query]);
+  }, [query, courses]);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-[#171c1e]">
@@ -68,7 +68,7 @@ export default function LandingPage() {
               <div>
                 <SectionTag>كورساتنا</SectionTag>
                 <h2 className="mt-5 text-4xl font-black tracking-tight sm:text-5xl">استكشف مسارات التعلّم</h2>
-                <p className="mt-4 max-w-2xl font-medium leading-8 text-slate-500">ابدأ بأحد المسارين المتاحين اليوم. القائمة مصممة لتتوسع تلقائياً مع إضافة كورسات جديدة.</p>
+                <p className="mt-4 max-w-2xl font-medium leading-8 text-slate-500">كورسان متاحان مجاناً الآن، ومسارا DevOps Bootcamp وCCNP Enterprise قادمان قريباً.</p>
               </div>
               <label className="flex w-full max-w-md items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-3 shadow-sm focus-within:border-[#1bb89d] focus-within:ring-4 focus-within:ring-teal-100">
                 <Search className="h-5 w-5 text-[#ff7438]" />
@@ -82,8 +82,8 @@ export default function LandingPage() {
             {filteredCourses.length === 0 && <div className="mt-12 rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center font-bold text-slate-500">لا يوجد كورس مطابق للبحث حالياً.</div>}
 
             <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-7">
-              <p className="flex items-center gap-2 text-sm font-bold text-slate-500"><Sparkles className="h-4 w-4 text-[#ff7438]" /> كورسات جديدة ستُضاف تباعاً.</p>
-              <Link to="/login" className="inline-flex items-center gap-2 rounded-full bg-[#171c1e] px-5 py-3 text-sm font-black text-white">ادخل إلى المنصة <ArrowLeft className="h-4 w-4" /></Link>
+              <p className="flex items-center gap-2 text-sm font-bold text-slate-500"><Sparkles className="h-4 w-4 text-[#ff7438]" /> مساران جديدان قيد التجهيز، والمنصة جاهزة لإضافة المزيد.</p>
+              <Link to="/login?mode=signup" className="inline-flex items-center gap-2 rounded-full bg-[#171c1e] px-5 py-3 text-sm font-black text-white">افتح حساباً مجانياً <ArrowLeft className="h-4 w-4" /></Link>
             </div>
           </div>
         </section>
@@ -110,12 +110,13 @@ export default function LandingPage() {
 
         <section id="instructor" className="bg-[#f7f9fb] py-24 lg:py-32">
           <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 lg:grid-cols-2 lg:px-8">
-            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative mx-auto w-full max-w-lg">
-              <div className="absolute inset-x-12 inset-y-0 rounded-[45%_45%_2rem_2rem] bg-[#ead9c9]" />
-              <img src={instructor.image} alt={instructor.name} className="relative h-[580px] w-full rounded-[2rem] object-cover object-top" />
-              <div className="absolute -bottom-5 right-6 rounded-2xl bg-white px-5 py-4 shadow-xl">
-                <strong className="block text-2xl font-black">CCIE</strong>
-                <span className="text-xs font-bold text-slate-500">Enterprise Infrastructure</span>
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative mx-auto min-h-[600px] w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-[#fff1ec]">
+              <div className="absolute -left-20 top-16 h-72 w-72 rounded-full bg-[#1bb89d]/16" />
+              <div className="absolute -right-16 bottom-16 h-64 w-64 rotate-12 rounded-[4rem] bg-[#ff7438]/12" />
+              <div className="absolute inset-x-12 bottom-0 h-[76%] rounded-t-[45%] bg-white/65" />
+              <img src={instructor.image} alt={instructor.name} className="absolute inset-0 h-full w-full object-contain object-bottom" />
+              <div className="absolute bottom-5 right-5 w-36 rounded-2xl bg-white p-3 shadow-xl">
+                <img src={instructor.certifications[0].logo} alt={instructor.certifications[0].name} className="h-20 w-full object-contain" />
               </div>
             </motion.div>
             <div>
@@ -124,8 +125,12 @@ export default function LandingPage() {
               <p className="mt-6 text-lg font-medium leading-9 text-slate-600">{instructor.bio}</p>
               <h3 className="mt-6 text-xl font-black">{instructor.name}</h3>
               <p className="mt-1 font-bold text-[#1bb89d]">{instructor.role}</p>
-              <div className="mt-7 flex flex-wrap gap-2">
-                {instructor.certifications.slice(0, 5).map((certification) => <span key={certification} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600">{certification}</span>)}
+              <div className="mt-7 grid grid-cols-3 gap-3 sm:grid-cols-5">
+                {instructor.certifications.map((certification) => (
+                  <div key={certification.name} className="grid min-h-24 place-items-center rounded-2xl border border-slate-200 bg-white p-2" title={`${certification.issuer} — ${certification.name}`}>
+                    <img src={certification.logo} alt={`${certification.issuer} ${certification.name}`} className="h-16 w-full object-contain" />
+                  </div>
+                ))}
               </div>
               <a href="#certifications" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#1bb89d] px-6 py-3.5 font-black text-white">عرض الشهادات <ArrowLeft className="h-4 w-4" /></a>
             </div>
@@ -140,8 +145,32 @@ export default function LandingPage() {
               <h2 className="mt-5 text-4xl font-black">معرفة مدعومة بمسار مهني حقيقي</h2>
               <p className="mx-auto mt-4 max-w-2xl font-medium leading-8 text-slate-500">اعتمادات في شبكات Cisco، الأمن، الحوسبة السحابية والافتراضية.</p>
             </div>
-            <div className="mt-12 overflow-hidden rounded-[2rem] border border-slate-200 bg-[#f7f9fb] p-3 shadow-[0_25px_80px_rgba(23,28,30,.08)] sm:p-6">
-              <img src="/assets/mohamed-certifications.png" alt="شهادات وخبرات المهندس محمد بشير المصراتي" className="w-full rounded-2xl object-contain" />
+            <div className="mt-12 grid gap-7 lg:grid-cols-[.8fr_1.2fr]">
+              <article className="relative overflow-hidden rounded-[2rem] bg-[#171c1e] p-8 text-white sm:p-10">
+                <div className="absolute -left-16 -top-16 h-48 w-48 rounded-full bg-[#1bb89d]/20" />
+                <img src="/assets/glorytech-mark.png" alt="" className="relative h-16 w-16 object-contain" />
+                <p className="relative mt-8 text-xs font-black text-[#69dbc8]">نبذة مهنية</p>
+                <h3 className="relative mt-3 text-3xl font-black leading-tight">{instructor.name}</h3>
+                <p className="relative mt-3 font-black text-[#ff9a6d]">{instructor.role}</p>
+                <p className="relative mt-6 text-sm font-medium leading-8 text-white/70">{instructor.bio}</p>
+                <div className="relative mt-7 flex flex-wrap gap-2 text-xs font-black">
+                  {['شبكات المؤسسات', 'الأمن', 'الحوسبة السحابية', 'الافتراضية'].map((area) => <span key={area} className="rounded-full border border-white/15 px-3 py-2 text-white/75">{area}</span>)}
+                </div>
+              </article>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {instructor.certifications.map((certification, index) => (
+                  <article key={certification.name} className={`${index === 0 ? 'sm:col-span-2' : ''} flex min-h-44 items-center gap-5 rounded-[1.75rem] border border-slate-200 bg-[#f7f9fb] p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-xl`}>
+                    <div className={`${index === 0 ? 'h-32 w-40' : 'h-24 w-28'} shrink-0 rounded-2xl bg-white p-2 shadow-sm`}>
+                      <img src={certification.logo} alt="" className="h-full w-full object-contain" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-[#1bb89d]">{certification.issuer}</p>
+                      <h3 dir="ltr" className="mt-2 text-left font-inter text-base font-black leading-6 text-slate-900">{certification.name}</h3>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -187,7 +216,7 @@ export default function LandingPage() {
                 <BookOpen className="h-10 w-10" />
                 <h3 className="mt-5 text-2xl font-black">ابدأ التعلّم</h3>
                 <p className="mt-3 text-sm font-medium leading-7 text-white/75">سجّل ببريدك، ادخل الكورس، واحفظ تقدّمك من أول درس.</p>
-                <Link to="/login" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#ff7438] px-5 py-3 text-sm font-black text-white">سجّل مجاناً <ArrowLeft className="h-4 w-4" /></Link>
+                <Link to="/login?mode=signup" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#ff7438] px-5 py-3 text-sm font-black text-white">افتح حساباً مجانياً <ArrowLeft className="h-4 w-4" /></Link>
               </div>
             </div>
           </div>

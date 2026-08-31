@@ -31,7 +31,7 @@ export default function Navbar() {
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
         <a href="#home" className="flex items-center gap-3" aria-label="GloryTech Academy — الرئيسية">
-          <img src="/assets/glorytech-logo.jpg" alt="GloryTech Academy" className="h-12 w-12 rounded-xl object-cover" />
+          <img src="/assets/glorytech-mark.png" alt="" className="h-12 w-12 object-contain" />
           <span className="hidden leading-none sm:block">
             <strong className="block font-inter text-base font-black tracking-tight text-slate-950">GLORYTECH</strong>
             <small className="font-inter text-[10px] font-bold tracking-[0.25em] text-[#1bb89d]">ACADEMY</small>
@@ -48,7 +48,7 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <a href="/login" className="px-4 py-2.5 text-sm font-bold text-slate-700 hover:text-[#ff7438]">تسجيل الدخول</a>
-          <a href="/login" className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#1bb89d]">
+          <a href="/login?mode=signup" className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#1bb89d]">
             ابدأ مجاناً
             <ArrowLeft className="h-4 w-4" />
           </a>
@@ -74,7 +74,7 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <a href="/login" className="mt-2 rounded-xl bg-[#1bb89d] px-5 py-3 text-center font-black text-white">ابدأ مجاناً</a>
+              <a href="/login?mode=signup" className="mt-2 rounded-xl bg-[#1bb89d] px-5 py-3 text-center font-black text-white">ابدأ مجاناً</a>
             </div>
           </motion.div>
         )}

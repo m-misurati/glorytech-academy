@@ -33,11 +33,18 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const sendOtp = async (email) => {
+  const sendOtp = async (email, { shouldCreateUser = false, profile = null } = {}) => {
     if (!supabase) throw new Error('لم يتم ربط مشروع Supabase بعد.');
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: true },
+      options: {
+        shouldCreateUser,
+        data: profile ? {
+          display_name: profile.displayName,
+          phone: profile.phone,
+          affiliation: profile.affiliation,
+        } : undefined,
+      },
     });
     if (error) throw error;
   };
@@ -49,8 +56,8 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const enterDemo = () => {
-    const user = { id: 'demo-user', email: 'student@glorytech.demo', isDemo: true };
+  const enterDemo = (profile = {}) => {
+    const user = { id: 'demo-user', email: 'student@glorytech.demo', user_metadata: { display_name: profile.displayName || 'طالب تجريبي', phone: profile.phone || null, affiliation: profile.affiliation || null }, isDemo: true };
     setDemoUser(user);
     return user;
   };

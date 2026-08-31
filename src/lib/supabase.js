@@ -20,9 +20,10 @@ export async function enrollInCourse(userId, courseId) {
 
   return supabase
     .from('enrollments')
-    .upsert({ user_id: userId, course_id: courseId }, { onConflict: 'user_id,course_id' })
-    .select()
-    .single();
+    .upsert(
+      { user_id: userId, course_id: courseId },
+      { onConflict: 'user_id,course_id', ignoreDuplicates: true },
+    );
 }
 
 export async function saveLessonProgress({ userId, lessonId, progressSeconds = 0, completed = false }) {
@@ -63,7 +64,7 @@ export async function getPublishedCatalog() {
   if (!supabase) return { data: null, error: null };
 
   const [coursesResult, modulesResult, lessonsResult] = await Promise.all([
-    supabase.from('courses').select('id, slug, title, short_title, description, level, accent, outcomes, duration_minutes, position').eq('is_published', true).order('position'),
+    supabase.from('courses').select('id, slug, title, short_title, description, level, accent, outcomes, duration_minutes, is_free, availability_status, cover_url, position').eq('is_published', true).order('position'),
     supabase.from('modules').select('id, course_id, title, position').order('position'),
     supabase.from('lessons').select('id, course_id, module_id, title, duration_seconds, position, is_preview, telegram_message_id').order('position'),
   ]);
@@ -96,8 +97,12 @@ export async function getPublishedCatalog() {
       shortTitle: course.short_title,
       description: course.description,
       level: course.level,
-      duration: `${Math.round(course.duration_minutes / 60)} ساعات`,
+      duration: course.availability_status === 'coming_soon' ? 'يُعلن قريباً' : `${Math.round(course.duration_minutes / 60)} ساعات`,
       lessonsCount: courseModules.reduce((total, module) => total + module.lessons.length, 0),
+      availability: course.availability_status || 'available',
+      isFree: course.is_free,
+      coverImage: course.cover_url,
+      coverAlt: `غلاف كورس ${course.title}`,
       accent,
       coverClass: accent === 'orange' ? 'from-[#fff0e9] via-[#fde1d4] to-[#dff8f2]' : 'from-[#dff8f2] via-[#c7f0e8] to-[#fff0e9]',
       outcomes: course.outcomes || [],

@@ -18,6 +18,7 @@ export default function LearnPage() {
   const [completed, setCompleted] = useState(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [progressError, setProgressError] = useState('');
 
   const allLessons = useMemo(() => course?.modules.flatMap((module) => module.lessons) || [], [course]);
   const lessonIndex = allLessons.findIndex((item) => item.id === lessonId);
@@ -30,11 +31,17 @@ export default function LearnPage() {
     return () => { active = false; };
   }, [user?.id]);
 
-  if (!course || !lesson) return <Navigate to="/404" replace />;
+  if (!course || course.availability === 'coming_soon' || !lesson) return <Navigate to="/404" replace />;
 
   const markComplete = async () => {
     setSaving(true);
-    await saveLessonProgress({ userId: user.id, lessonId: lesson.id, completed: true });
+    setProgressError('');
+    const { error } = await saveLessonProgress({ userId: user.id, lessonId: lesson.id, completed: true });
+    if (error) {
+      setProgressError('تعذّر حفظ تقدّمك. تأكد من الاتصال وحاول مرة أخرى.');
+      setSaving(false);
+      return;
+    }
     setCompleted((current) => new Set([...current, lesson.id]));
     setSaving(false);
     if (nextLesson) navigate(`/learn/${course.slug}/${nextLesson.id}`);
@@ -60,6 +67,7 @@ export default function LearnPage() {
           <div className="mx-auto max-w-5xl py-7">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start"><div><span className="text-xs font-black text-[#1bb89d]">الدرس {lessonIndex + 1} من {allLessons.length}</span><h2 className="mt-2 text-2xl font-black sm:text-3xl">{lesson.title}</h2><p className="mt-3 text-sm font-medium text-white/45">مدة الدرس: {lesson.duration}</p></div><button type="button" disabled={saving || completed.has(lesson.id)} onClick={markComplete} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#1bb89d] px-6 py-3.5 font-black text-white disabled:bg-white/10 disabled:text-white/50">{completed.has(lesson.id) ? <><CheckCircle2 className="h-5 w-5" /> مكتمل</> : saving ? 'جارٍ الحفظ…' : <>{nextLesson ? 'أكمل وانتقل للتالي' : 'أكمل الكورس'} <ChevronLeft className="h-5 w-5" /></>}</button></div>
             {isDemo && <p className="mt-7 rounded-xl border border-[#ff7438]/20 bg-[#ff7438]/10 px-4 py-3 text-xs font-bold text-orange-200">وضع المعاينة: الإنجاز يبقى في هذه الجلسة فقط إلى أن يتم ربط Supabase.</p>}
+            {progressError && <p className="mt-7 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-xs font-bold text-red-200" role="alert">{progressError}</p>}
             <div className="mt-8 rounded-2xl border border-white/10 bg-white/[.04] p-6"><div className="flex items-center gap-3"><ListVideo className="h-6 w-6 text-[#ff7438]" /><h3 className="font-black">عن هذا الدرس</h3></div><p className="mt-4 text-sm font-medium leading-8 text-white/55">تابع الشرح، طبّق الخطوات داخل مختبرك، ثم علّم الدرس كمكتمل. يمكنك الرجوع إليه في أي وقت من لوحة الطالب.</p></div>
           </div>
         </main>

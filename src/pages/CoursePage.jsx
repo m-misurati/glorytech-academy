@@ -15,17 +15,30 @@ export default function CoursePage() {
   const navigate = useNavigate();
   const [openModule, setOpenModule] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [enrollError, setEnrollError] = useState('');
 
   if (!course) return <Navigate to="/404" replace />;
+  if (course.availability === 'coming_soon') return <Navigate to="/#courses" replace />;
 
   const startCourse = async () => {
     if (!user) {
-      navigate('/login', { state: { from: `/courses/${course.slug}` } });
+      navigate('/login?mode=signup', { state: { from: `/courses/${course.slug}` } });
       return;
     }
     setBusy(true);
-    await enrollInCourse(user.id, course.id);
+    setEnrollError('');
+    const { error } = await enrollInCourse(user.id, course.id);
+    if (error) {
+      setEnrollError('تعذّر تسجيلك في الكورس الآن. جرّب مرة أخرى.');
+      setBusy(false);
+      return;
+    }
     const lesson = getFirstLesson(course);
+    if (!lesson) {
+      setEnrollError('محتوى هذا الكورس غير جاهز بعد.');
+      setBusy(false);
+      return;
+    }
     navigate(`/learn/${course.slug}/${lesson.id}`);
   };
 
@@ -42,14 +55,13 @@ export default function CoursePage() {
               <p className="mt-6 max-w-2xl text-lg font-medium leading-9 text-slate-600">{course.description}</p>
               <div className="mt-7 flex flex-wrap gap-5 text-sm font-bold text-slate-600"><span className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-[#1bb89d]" /> {course.lessonsCount} دروس</span><span className="flex items-center gap-2"><Clock3 className="h-5 w-5 text-[#1bb89d]" /> {course.duration}</span><span className="flex items-center gap-2"><Signal className="h-5 w-5 text-[#1bb89d]" /> {course.level}</span></div>
               <button type="button" onClick={startCourse} disabled={busy} className="mt-9 inline-flex items-center gap-3 rounded-full bg-[#1bb89d] px-7 py-4 font-black text-white shadow-lg shadow-teal-800/15 transition hover:-translate-y-1 disabled:opacity-60">{busy ? 'نجهّز الكورس…' : user ? 'ابدأ التعلّم الآن' : 'سجّل وابدأ مجاناً'} <ArrowLeft className="h-5 w-5" /></button>
+              {enrollError && <p className="mt-4 text-sm font-bold text-red-600" role="alert">{enrollError}</p>}
             </div>
 
-            <div className={`relative min-h-[390px] overflow-hidden rounded-[2rem] bg-gradient-to-br ${course.coverClass} p-8`}>
-              <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(#334155_1px,transparent_1px)] [background-size:24px_24px]" />
-              <div className="relative mx-auto grid h-[320px] max-w-sm place-items-center rounded-[2.5rem] border border-white/70 bg-white/70 shadow-2xl backdrop-blur">
-                <PlayCircle className="h-24 w-24 text-[#ff7438]" />
-                <div className="absolute bottom-8 left-8 right-8 rounded-2xl bg-[#171c1e] p-4 text-white"><small className="text-white/55">GloryTech Track</small><strong className="mt-1 block">{course.shortTitle}</strong></div>
-              </div>
+            <div className="relative aspect-[16/10] min-h-[390px] overflow-hidden rounded-[2rem] bg-slate-900 shadow-2xl">
+              <img src={course.coverImage} alt={course.coverAlt || ''} className="absolute inset-0 h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-slate-950/75 p-4 text-white backdrop-blur"><div><small className="text-white/55">GloryTech Track</small><strong className="mt-1 block">{course.shortTitle}</strong></div><PlayCircle className="h-12 w-12 shrink-0 text-[#ff7438]" /></div>
             </div>
           </div>
         </section>
@@ -70,7 +82,7 @@ export default function CoursePage() {
 
           <aside className="space-y-7">
             <div className="rounded-[2rem] bg-[#171c1e] p-7 text-white"><h2 className="text-2xl font-black">ماذا ستتعلّم؟</h2><ul className="mt-6 space-y-4">{course.outcomes.map((outcome) => <li key={outcome} className="flex gap-3 text-sm font-medium leading-7 text-white/75"><span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#1bb89d]"><Check className="h-3.5 w-3.5" /></span>{outcome}</li>)}</ul></div>
-            <div className="flex items-center gap-4 rounded-[2rem] border border-slate-200 bg-white p-5"><img src={instructor.image} alt="" className="h-20 w-20 rounded-2xl object-cover object-top" /><div><small className="font-black text-[#ff7438]">مدرّب الكورس</small><strong className="mt-1 block">{instructor.name}</strong><span className="mt-1 block text-xs font-bold text-slate-500">CCIE Enterprise</span></div></div>
+            <div className="flex items-center gap-4 rounded-[2rem] border border-slate-200 bg-white p-5"><div className="h-20 w-20 overflow-hidden rounded-2xl bg-[#fff1ec]"><img src={instructor.image} alt="" className="h-full w-full object-contain object-bottom" /></div><div className="min-w-0 flex-1"><small className="font-black text-[#ff7438]">مدرّب الكورس</small><strong className="mt-1 block">{instructor.name}</strong><img src={instructor.certifications[0].logo} alt={instructor.certifications[0].name} className="mt-2 h-10 w-20 object-contain object-left" /></div></div>
           </aside>
         </section>
       </main>

@@ -20,6 +20,8 @@ export function CatalogProvider({ children }) {
 
   const value = useMemo(() => ({
     courses,
+    availableCourses: courses.filter((course) => course.availability !== 'coming_soon'),
+    upcomingCourses: courses.filter((course) => course.availability === 'coming_soon'),
     loading,
     getCourseBySlug: (slug) => courses.find((course) => course.slug === slug),
   }), [courses, loading]);
