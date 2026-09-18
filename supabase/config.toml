@@ -249,8 +249,12 @@ otp_expiry = 600
 # content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.magic_link]
-subject = "رمز الدخول إلى GloryTech Academy"
+subject = "رمز الدخول إلى GloryTech Academy | Sign-in code"
 content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "رمز تفعيل حسابك في GloryTech Academy | Verification code"
+content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 96" role="img" aria-label="Cisco DevNet">
+  <title>Cisco DevNet</title>
+  <g fill="#1BA0D7">
+    <!-- Cisco signal bars -->
+    <rect x="66" y="16" width="5" height="12" rx="2.5"/>
+    <rect x="77" y="8" width="5" height="20" rx="2.5"/>
+    <rect x="88" y="16" width="5" height="12" rx="2.5"/>
+    <rect x="99" y="2" width="5" height="26" rx="2.5"/>
+    <rect x="110" y="16" width="5" height="12" rx="2.5"/>
+    <rect x="121" y="8" width="5" height="20" rx="2.5"/>
+    <rect x="132" y="16" width="5" height="12" rx="2.5"/>
+  </g>
+  <text x="100" y="66" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" letter-spacing="1" fill="#1D69B4">DEVNET</text>
+  <rect x="34" y="80" width="60" height="5" fill="#57BEEB"/>
+  <rect x="106" y="80" width="60" height="5" fill="#6E7FC4"/>
+</svg>

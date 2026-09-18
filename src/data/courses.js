@@ -1,162 +1,180 @@
-export const instructor = {
-  name: 'المهندس محمد بشير المصراتي',
-  role: 'مهندس اتصالات سحابية — المدار الجديد',
-  bio: 'خبرة عملية في شبكات المؤسسات، الأمن، البنية السحابية والافتراضية، يقدّم المعرفة التقنية المعقّدة بخطوات عربية واضحة وتطبيقات قريبة من بيئة العمل.',
-  image: '/assets/mohamed-bashir-cutout.png',
-  certifications: [
-    { name: 'CCIE Enterprise', issuer: 'Cisco', logo: '/assets/certifications/ccie-enterprise.png' },
-    { name: 'CCNP Enterprise', issuer: 'Cisco', logo: '/assets/certifications/ccnp-enterprise.png' },
-    { name: 'CCNP Security', issuer: 'Cisco', logo: '/assets/certifications/ccnp-security.png' },
-    { name: 'Enterprise Wireless Implementation', issuer: 'Cisco Certified Specialist', logo: '/assets/certifications/cisco-specialist.png' },
-    { name: 'Data Center Virtualization 2022', issuer: 'VMware Certified Professional', logo: '/assets/certifications/vmware-vcp.png' },
-  ],
-};
+// Local copy of the catalog, used until Supabase answers (or when it is not configured).
+// Keep in sync with supabase/migrations/20260917090000_instructors_billing_ccna_content.sql.
+const MOHAMED_ID = '00000000-0000-4000-8000-000000000501';
+
+export const instructors = [
+  {
+    id: MOHAMED_ID,
+    slug: 'mohamed-al-misurati',
+    name: 'المهندس محمد بشير المصراتي',
+    nameEn: 'Eng. Mohamed Bashir Al-Misurati',
+    title: "مهندس ومدرّب شبكات وحوسبة سحابية",
+    titleEn: "Network & Cloud Engineer and Instructor",
+    bio: "مهندس شبكات وحوسبة سحابية بخبرة ميدانية في تصميم وتشغيل شبكات المشغّلين والمؤسسات، نفّذ مشاريع عديدة في الربط والأمن والبنية السحابية والافتراضية. حاصل على CCIE Enterprise Infrastructure وعدد كبير من شهادات Cisco و VMware و Fortinet و Microsoft، ودرّب آلاف الطلبة والمهندسين في دورات عملية تبدأ من الأساسيات وتصل إلى مستوى الاحتراف، بأمثلة من قلب بيئة العمل.",
+    bioEn: "A network and cloud engineer with field experience designing and running carrier and enterprise networks, delivered across connectivity, security, cloud and virtualization projects. He holds CCIE Enterprise Infrastructure along with a long list of Cisco, VMware, Fortinet and Microsoft certifications, and has trained thousands of students and engineers in hands-on courses that start from the fundamentals and reach professional level, with examples straight from real work.",
+    photo: '/assets/mohamed-bashir-cutout.png',
+    expertise: ["الشبكات","أمن الشبكات","الحوسبة السحابية","الافتراضية","أتمتة الشبكات"],
+    expertiseEn: ["Networking","Network security","Cloud computing","Virtualization","Network automation"],
+    certifications: [
+      {"name":"CCIE Enterprise Infrastructure","issuer":"Cisco","logo":"/assets/certifications/ccie-enterprise.png","featured":true},
+      {"name":"CCNP Enterprise","issuer":"Cisco","logo":"/assets/certifications/ccnp-enterprise.png"},
+      {"name":"CCNP Security","issuer":"Cisco","logo":"/assets/certifications/ccnp-security.png"},
+      {"name":"Enterprise Wireless Implementation","issuer":"Cisco Specialist","logo":"/assets/certifications/cisco-specialist.png"},
+      {"name":"Enterprise SD-WAN Implementation","issuer":"Cisco Specialist","logo":"/assets/certifications/cisco-specialist-sdwan.png"},
+      {"name":"Enterprise Core ENCOR 350-401","issuer":"Cisco Specialist","logo":"/assets/certifications/cisco-specialist-encor.png"},
+      {"name":"Advanced Infrastructure Implementation","issuer":"Cisco Specialist","logo":"/assets/certifications/cisco-specialist-advanced-infra.png"},
+      {"name":"Network Security Firepower","issuer":"Cisco Specialist","logo":"/assets/certifications/cisco-specialist-firepower.png"},
+      {"name":"Security Core","issuer":"Cisco Specialist","logo":"/assets/certifications/cisco-specialist-security-core.png"},
+      {"name":"CCNA 200-301","issuer":"Cisco","logo":"/assets/certifications/ccna-200-301.png"},
+      {"name":"Data Center Virtualization 2022","issuer":"VMware Professional","logo":"/assets/certifications/vmware-vcp.png"},
+      {"name":"Digital Workspace","issuer":"VMware Professional","logo":"/assets/certifications/vmware-vcp-dw.png"},
+      {"name":"Azure Fundamentals AZ-900","issuer":"Microsoft","logo":"/assets/certifications/azure-fundamentals.png"},
+      {"name":"MCSA 70-740","issuer":"Microsoft","logo":"/assets/certifications/microsoft-mcsa.png"},
+      {"name":"JNCIA-Junos","issuer":"Juniper","logo":"/assets/certifications/juniper-jncia.png"},
+      {"name":"NSE 4 Network Security Professional","issuer":"Fortinet","logo":"/assets/certifications/fortinet-nse4.png"},
+      {"name":"NSE 3 Network Security Associate","issuer":"Fortinet","logo":"/assets/certifications/fortinet-nse3.png"},
+      {"name":"NSE 2 Network Security Associate","issuer":"Fortinet","logo":"/assets/certifications/fortinet-nse2.png"},
+      {"name":"NSE 1 Network Security Associate","issuer":"Fortinet","logo":"/assets/certifications/fortinet-nse1.png"},
+      {"name":"HCIA Routing & Switching","issuer":"Huawei","logo":"/assets/certifications/huawei-hcia.png"},
+      {"name":"RAS Technical Professional Advanced (RAS-TPA)","issuer":"Parallels","logo":"/assets/certifications/parallels-ras-tpa.png"},
+      {"name":"RAS Technical Professional (RAS-TP)","issuer":"Parallels","logo":"/assets/certifications/parallels-ras-tp.png"},
+      {"name":"Certified Network Security Specialist","issuer":"ICSI","logo":"/assets/certifications/icsi-network-security.png"},
+      {"name":"IC3 Digital Literacy Certification","issuer":"Certiport","logo":"/assets/certifications/ic3-digital-literacy.png"}
+    ],
+    position: 1,
+  },
+];
+
+const lessonId = (suffix) => `00000000-0000-4000-8000-00000000${suffix}`;
+
+// Titles match the recorded file names exactly (CCNA 1 durations are added after upload).
+const ccna1Lessons = [
+  ['CCNA1 Introduction to Networks', 611, true],
+  ['Module-1 Networking Today'],
+  ['Module-2 Basic Switch and End Device Configuration'],
+  ['Module-3 Protocols and Models'],
+  ['Module-4 Physical Layer'],
+  ['Module-5 Numbering Systems'],
+  ['Module-6 Data Link Layer'],
+  ['Module-7 Ethernet Switching'],
+  ['Module-8 Network Layer'],
+  ['Module-9 Address Resolution'],
+  ['Module-10 Basic Router Configuration'],
+  ['Module-11 IPv4 Addressing'],
+  ['Module-12 IPv6 Addressing'],
+  ['Module-13 ICMP'],
+  ['Module-14 Transport Layer'],
+  ['Module-15 Application Layer'],
+  ['Module-16 Network Security Fundamentals'],
+  ['Module-17 Build a Small Network'],
+].map(([title, durationSeconds = 0, isPreview = false], index) => ({
+  id: lessonId(String(1101 + index)),
+  title,
+  titleEn: title,
+  durationSeconds,
+  isPreview,
+}));
+
+const ccna4Lessons = [
+  ['Module-1 WAN Concepts', 6723, true],
+  ['Module-2 VPN and IPsec Concepts', 5091],
+  ['Module-3 Branch Connections', 2201],
+  ['Module-4 Extended ACLs', 4059],
+  ['Module-5 QoS Concepts', 5639],
+  ['Module-6 Network Management', 4798],
+  ['Module-7 Network Design', 3488],
+  ['Module-8 Network Troubleshooting', 4157],
+  ['Module-9 Network Virtualization', 4475],
+  ['Module-10 Network Automation', 5067],
+].map(([title, durationSeconds, isPreview = false], index) => ({
+  id: lessonId(String(1201 + index)),
+  title,
+  titleEn: title,
+  durationSeconds,
+  isPreview,
+}));
 
 export const courses = [
   {
     id: '00000000-0000-4000-8000-000000000101',
-    slug: 'networking-foundations-ccna',
-    code: 'المسار 01',
-    title: 'أساسيات الشبكات — CCNA',
-    shortTitle: 'أساسيات الشبكات',
-    description: 'ابدأ من الصفر: افهم مكوّنات الشبكة، نموذج OSI، العنونة، التحويل والتوجيه، ثم طبّق ما تعلّمته خطوة بخطوة.',
+    slug: 'ccna1-introduction-to-networks',
+    code: 'CCNA 1',
+    title: 'CCNA1: Introduction to Networks',
+    titleEn: 'CCNA1: Introduction to Networks',
+    shortTitle: 'CCNA 1',
+    shortTitleEn: 'CCNA 1',
+    description: 'الجزء الأول من مسار CCNA: تتعرّف على الشبكات من الصفر — النماذج والبروتوكولات، الطبقة الفيزيائية وطبقة ربط البيانات، Ethernet Switching، عنونة IPv4 و IPv6، إعداد السويتش والراوتر، وأساسيات أمن الشبكات، ثم تبني شبكة صغيرة بنفسك.',
+    descriptionEn: 'Part one of the CCNA track: learn networking from scratch — models and protocols, the physical and data link layers, Ethernet switching, IPv4 and IPv6 addressing, basic switch and router configuration, and network security fundamentals, then build a small network yourself.',
     level: 'مبتدئ',
-    duration: '6 ساعات',
-    lessonsCount: 8,
+    levelEn: 'Beginner',
+    durationMinutes: 1150,
+    isFree: true,
+    price: 0,
     availability: 'available',
     coverImage: '/assets/courses/ccna-foundations.jpg',
-    coverAlt: 'طالب يطبّق إعدادات الشبكات داخل مختبر احترافي',
-    accent: 'emerald',
-    coverClass: 'from-[#dff8f2] via-[#c7f0e8] to-[#fff0e9]',
+    instructorId: MOHAMED_ID,
+    position: 1,
     outcomes: [
-      'فهم طريقة انتقال البيانات داخل الشبكات',
-      'تقسيم عناوين IPv4 وقراءة الـ Subnet',
-      'إعداد أساسيات Switching وRouting',
-      'بناء مختبر شبكات صغير واختباره',
+      'فهم نموذجي OSI و TCP/IP وكيف تنتقل البيانات عبر الشبكة',
+      'الإعداد الأساسي للسويتش والراوتر وأجهزة المستخدمين',
+      'تقسيم الشبكات وعنونتها باستخدام IPv4 و IPv6',
+      'تطبيق أساسيات أمن الشبكات وبناء شبكة صغيرة متكاملة',
+    ],
+    outcomesEn: [
+      'Understand the OSI and TCP/IP models and how data moves across a network',
+      'Perform basic configuration of switches, routers, and end devices',
+      'Subnet and address networks with IPv4 and IPv6',
+      'Apply network security fundamentals and build a complete small network',
     ],
     modules: [
-      {
-        id: '00000000-0000-4000-8000-000000000201',
-        title: 'مدخل إلى عالم الشبكات',
-        lessons: [
-          { id: '00000000-0000-4000-8000-000000000301', title: 'كيف تعمل الشبكات؟', duration: '12:40', isPreview: true },
-          { id: '00000000-0000-4000-8000-000000000302', title: 'أجهزة الشبكة ووظيفة كل جهاز', duration: '18:20' },
-          { id: '00000000-0000-4000-8000-000000000303', title: 'نموذج OSI ببساطة', duration: '22:15' },
-          { id: '00000000-0000-4000-8000-000000000304', title: 'مختبرك الأول', duration: '16:05' },
-        ],
-      },
-      {
-        id: '00000000-0000-4000-8000-000000000202',
-        title: 'العنونة والربط',
-        lessons: [
-          { id: '00000000-0000-4000-8000-000000000305', title: 'فهم IPv4', duration: '25:10' },
-          { id: '00000000-0000-4000-8000-000000000306', title: 'Subnetting بطريقة عملية', duration: '34:25' },
-          { id: '00000000-0000-4000-8000-000000000307', title: 'أساسيات Switching', duration: '28:00' },
-          { id: '00000000-0000-4000-8000-000000000308', title: 'الاختبار العملي للمسار', duration: '20:30' },
-        ],
-      },
+      { id: '00000000-0000-4000-8000-000000000211', title: 'محتوى الكورس', titleEn: 'Course content', lessons: ccna1Lessons },
     ],
   },
   {
     id: '00000000-0000-4000-8000-000000000102',
-    slug: 'enterprise-networking',
-    code: 'المسار 02',
-    title: 'الشبكات المؤسسية — من الفهم إلى التطبيق',
-    shortTitle: 'الشبكات المؤسسية',
-    description: 'انتقل من الأساسيات إلى تصميم شبكات مؤسسية أكثر اعتمادية، مع VLANs والتوجيه الديناميكي والأمن والمراقبة.',
+    slug: 'ccna4-connecting-networks',
+    code: 'CCNA 4',
+    title: 'CCNA 4: Connecting Networks',
+    titleEn: 'CCNA 4: Connecting Networks',
+    shortTitle: 'CCNA 4',
+    shortTitleEn: 'CCNA 4',
+    description: 'مسار Connecting Networks: تتعمّق في ربط الشبكات الواسعة — مفاهيم WAN، شبكات VPN و IPsec، ربط الفروع، قوائم ACL الموسّعة، جودة الخدمة QoS، إدارة الشبكات وتصميمها واستكشاف أعطالها، وصولاً إلى الافتراضية وأتمتة الشبكات.',
+    descriptionEn: 'Connecting Networks: go deeper into wide-area connectivity — WAN concepts, VPNs and IPsec, branch connections, extended ACLs, QoS, network management, design and troubleshooting, all the way to network virtualization and automation.',
     level: 'متوسط',
-    duration: '8 ساعات',
-    lessonsCount: 8,
+    levelEn: 'Intermediate',
+    durationMinutes: 762,
+    isFree: true,
+    price: 0,
     availability: 'available',
     coverImage: '/assets/courses/enterprise-networking.jpg',
-    coverAlt: 'مهندس شبكات يفحص تجهيزات مركز بيانات مؤسسي',
-    accent: 'orange',
-    coverClass: 'from-[#fff0e9] via-[#fde1d4] to-[#dff8f2]',
+    instructorId: MOHAMED_ID,
+    position: 2,
     outcomes: [
-      'تصميم شبكات VLAN وفهم Trunking',
-      'تطبيق مبادئ التوجيه الديناميكي',
-      'تقوية الشبكة ضد الأخطاء الشائعة',
-      'قراءة مؤشرات الشبكة وتشخيص المشاكل',
+      'فهم تقنيات WAN وربط الفروع بالشبكة الرئيسية',
+      'بناء اتصالات آمنة باستخدام VPN و IPsec',
+      'ضبط قوائم ACL الموسّعة وسياسات جودة الخدمة QoS',
+      'إدارة الشبكات واستكشاف أعطالها والتعرّف على الافتراضية والأتمتة',
+    ],
+    outcomesEn: [
+      'Understand WAN technologies and connect branches to the core network',
+      'Build secure connections with VPNs and IPsec',
+      'Configure extended ACLs and QoS policies',
+      'Manage and troubleshoot networks, and get started with virtualization and automation',
     ],
     modules: [
-      {
-        id: '00000000-0000-4000-8000-000000000203',
-        title: 'تصميم شبكة المؤسسة',
-        lessons: [
-          { id: '00000000-0000-4000-8000-000000000309', title: 'مبادئ التصميم القابل للتوسع', duration: '21:30', isPreview: true },
-          { id: '00000000-0000-4000-8000-000000000310', title: 'VLAN وTrunking', duration: '31:10' },
-          { id: '00000000-0000-4000-8000-000000000311', title: 'Inter-VLAN Routing', duration: '27:45' },
-          { id: '00000000-0000-4000-8000-000000000312', title: 'Redundancy والاعتمادية', duration: '24:20' },
-        ],
-      },
-      {
-        id: '00000000-0000-4000-8000-000000000204',
-        title: 'التشغيل والحماية',
-        lessons: [
-          { id: '00000000-0000-4000-8000-000000000313', title: 'مقدمة في OSPF', duration: '35:00' },
-          { id: '00000000-0000-4000-8000-000000000314', title: 'أمن المنافذ وACL', duration: '29:40' },
-          { id: '00000000-0000-4000-8000-000000000315', title: 'المراقبة واستكشاف الأعطال', duration: '32:15' },
-          { id: '00000000-0000-4000-8000-000000000316', title: 'مشروع الشبكة النهائي', duration: '42:00' },
-        ],
-      },
+      { id: '00000000-0000-4000-8000-000000000212', title: 'محتوى الكورس', titleEn: 'Course content', lessons: ccna4Lessons },
     ],
   },
-  {
-    id: '00000000-0000-4000-8000-000000000103',
-    slug: 'devops-bootcamp',
-    code: 'المسار 03',
-    title: 'DevOps Bootcamp',
-    shortTitle: 'DevOps Bootcamp',
-    description: 'مسار عملي مكثّف يربط Linux وGit وCI/CD والحاويات والمراقبة لبناء دورة تسليم حديثة من الكود إلى التشغيل.',
-    level: 'متوسط إلى متقدم',
-    duration: 'يُعلن قريباً',
-    lessonsCount: 0,
-    availability: 'coming_soon',
-    coverImage: '/assets/courses/devops-bootcamp.jpg',
-    coverAlt: 'مهندس DevOps يعمل على خطوط النشر والحاويات في بيئة احترافية',
-    accent: 'emerald',
-    coverClass: 'from-[#dff8f2] via-[#c7f0e8] to-[#fff0e9]',
-    outcomes: [
-      'بناء خط CI/CD عملي',
-      'إدارة الحاويات وبيئات التشغيل',
-      'أتمتة الاختبارات والنشر',
-      'مراقبة الخدمات ومعالجة الأعطال',
-    ],
-    modules: [],
-  },
-  {
-    id: '00000000-0000-4000-8000-000000000104',
-    slug: 'ccnp-enterprise',
-    code: 'المسار 04',
-    title: 'CCNP Enterprise',
-    shortTitle: 'CCNP Enterprise',
-    description: 'تعمّق في تصميم وتشغيل شبكات المؤسسات، التوجيه المتقدم، الاعتمادية، اللاسلكي والأتمتة ضمن مسار تحضيري عملي.',
-    level: 'متقدم',
-    duration: 'يُعلن قريباً',
-    lessonsCount: 0,
-    availability: 'coming_soon',
-    coverImage: '/assets/courses/ccnp-enterprise.jpg',
-    coverAlt: 'مهندس يخطط لبنية شبكة مؤسسات متقدمة داخل مختبر حديث',
-    accent: 'orange',
-    coverClass: 'from-[#fff0e9] via-[#fde1d4] to-[#dff8f2]',
-    outcomes: [
-      'تصميم شبكات مؤسسات قابلة للتوسع',
-      'إتقان بروتوكولات التوجيه المتقدمة',
-      'رفع الاعتمادية وتحسين الأداء',
-      'الاستعداد العملي لمسار CCNP Enterprise',
-    ],
-    modules: [],
-  },
-];
+].map((course) => ({ ...course, lessonsCount: course.modules.reduce((total, module) => total + module.lessons.length, 0) }));
 
-export function getCourseBySlug(slug) {
-  return courses.find((course) => course.slug === slug);
+export function getAllLessons(course) {
+  return course?.modules.flatMap((module) => module.lessons) ?? [];
 }
 
-export function getLesson(course, lessonId) {
-  return course?.modules.flatMap((module) => module.lessons).find((lesson) => lesson.id === lessonId);
+export function getLesson(course, id) {
+  return getAllLessons(course).find((lesson) => lesson.id === id);
 }
 
 export function getFirstLesson(course) {
-  return course?.modules[0]?.lessons[0];
+  return getAllLessons(course)[0];
 }

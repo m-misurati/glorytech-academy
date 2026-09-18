@@ -1,0 +1,9 @@
+# Worker-only values for local development (production: `wrangler secret put <NAME>`).
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_replace_me
+# Random secret used to sign short-lived video stream links.
+STREAM_SIGNING_SECRET=generate-a-long-random-string
+
+# Service role key (Supabase → Project Settings → API). Lets the Worker read the lesson
+# videos instructors set in the portal. Never expose it in the browser.
+SUPABASE_SERVICE_ROLE_KEY=

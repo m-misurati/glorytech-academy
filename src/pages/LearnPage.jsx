@@ -1,35 +1,59 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, CheckCircle2, ChevronLeft, Circle, ListVideo, Menu, X } from 'lucide-react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import AppHeader from '../components/AppHeader';
+import { ArrowRight, Check, CheckCircle2, Circle, ListVideo, Menu, X } from 'lucide-react';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import CourseBadge from '../components/CourseBadge';
 import LessonPlayer from '../components/LessonPlayer';
+import LessonResources from '../components/LessonResources';
+import SiteHeader from '../components/SiteHeader';
 import { useAuth } from '../context/AuthContext';
 import { useCatalog } from '../context/CatalogContext';
-import { getLesson } from '../data/courses';
-import { getUserProgress, saveLessonProgress } from '../lib/supabase';
+import { getAllLessons } from '../data/courses';
+import { useI18n } from '../i18n/I18nContext';
+import { usePageMeta } from '../lib/meta';
+import { getLessonResources, getUserProgress, saveLessonPosition, saveLessonProgress } from '../lib/supabase';
 
 export default function LearnPage() {
   const { slug, lessonId } = useParams();
   const { getCourseBySlug } = useCatalog();
-  const course = getCourseBySlug(slug);
-  const lesson = getLesson(course, lessonId);
+  const { t, pick, formatClock } = useI18n();
   const { user, isDemo } = useAuth();
   const navigate = useNavigate();
   const [completed, setCompleted] = useState(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [progressError, setProgressError] = useState('');
+  const [positions, setPositions] = useState({});
+  const [resources, setResources] = useState([]);
+  const course = getCourseBySlug(slug);
 
-  const allLessons = useMemo(() => course?.modules.flatMap((module) => module.lessons) || [], [course]);
-  const lessonIndex = allLessons.findIndex((item) => item.id === lessonId);
-  const nextLesson = allLessons[lessonIndex + 1];
-  const progress = allLessons.length ? Math.round((completed.size / allLessons.length) * 100) : 0;
+  const lessons = useMemo(() => getAllLessons(course), [course]);
+  const lessonIndex = lessons.findIndex((item) => item.id === lessonId);
+  const lesson = lessons[lessonIndex];
+  const nextLesson = lessons[lessonIndex + 1];
+  const courseLessonIds = useMemo(() => new Set(lessons.map((item) => item.id)), [lessons]);
+  usePageMeta({ title: lesson ? pick(lesson, 'title') : undefined });
+  const completedHere = [...completed].filter((id) => courseLessonIds.has(id)).length;
+  const progress = lessons.length ? Math.round((completedHere / lessons.length) * 100) : 0;
 
   useEffect(() => {
     let active = true;
-    getUserProgress(user?.id).then(({ data }) => { if (active && data) setCompleted(new Set(data.filter((row) => row.completed_at).map((row) => row.lesson_id))); });
+    getUserProgress(user?.id).then(({ data }) => {
+      if (!active || !data) return;
+      setCompleted(new Set(data.filter((row) => row.completed_at).map((row) => row.lesson_id)));
+      setPositions(Object.fromEntries(data.map((row) => [row.lesson_id, row.progress_seconds || 0])));
+    });
     return () => { active = false; };
   }, [user?.id]);
+
+  useEffect(() => { setProgressError(''); }, [lessonId]);
+
+  useEffect(() => {
+    let active = true;
+    setResources([]);
+    if (!lessonId) return undefined;
+    getLessonResources([lessonId]).then(({ data }) => { if (active && data) setResources(data); });
+    return () => { active = false; };
+  }, [lessonId, user?.id]);
 
   if (!course || course.availability === 'coming_soon' || !lesson) return <Navigate to="/404" replace />;
 
@@ -37,38 +61,98 @@ export default function LearnPage() {
     setSaving(true);
     setProgressError('');
     const { error } = await saveLessonProgress({ userId: user.id, lessonId: lesson.id, completed: true });
+    setSaving(false);
     if (error) {
-      setProgressError('تعذّر حفظ تقدّمك. تأكد من الاتصال وحاول مرة أخرى.');
-      setSaving(false);
+      setProgressError(t('learn.progressError'));
       return;
     }
     setCompleted((current) => new Set([...current, lesson.id]));
-    setSaving(false);
     if (nextLesson) navigate(`/learn/${course.slug}/${nextLesson.id}`);
   };
 
+  const isDone = completed.has(lesson.id);
+  const clock = formatClock(lesson.durationSeconds);
+
   return (
-    <div className="min-h-screen bg-[#0f1416] text-white">
-      <AppHeader dark />
+    <div className="min-h-screen bg-canvas text-ink">
+      <SiteHeader compact />
       <div className="mx-auto flex max-w-[1600px]">
-        <aside className={`${sidebarOpen ? 'translate-x-0' : 'translate-x-full'} fixed inset-y-0 right-0 z-50 w-[88%] max-w-sm overflow-y-auto border-l border-white/10 bg-[#141a1c] transition lg:sticky lg:top-[73px] lg:h-[calc(100vh-73px)] lg:w-[380px] lg:translate-x-0`}>
-          <div className="sticky top-0 z-10 border-b border-white/10 bg-[#141a1c]/95 p-5 backdrop-blur">
-            <div className="flex items-start justify-between gap-4"><div><small className="font-black text-[#ff7438]">{course.code}</small><h1 className="mt-2 font-black leading-6">{course.shortTitle}</h1></div><button type="button" onClick={() => setSidebarOpen(false)} className="lg:hidden"><X className="h-5 w-5" /></button></div>
-            <div className="mt-4 flex items-center gap-3"><div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-[#1bb89d]" style={{ width: `${progress}%` }} /></div><span className="text-xs font-black text-white/60">{progress}%</span></div>
+        <aside className={`${sidebarOpen ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'} fixed inset-y-0 start-0 z-50 w-[88%] max-w-sm overflow-y-auto border-e border-line bg-surface transition lg:sticky lg:top-[4.5rem] lg:h-[calc(100vh-4.5rem)] lg:w-[380px] lg:max-w-none lg:!translate-x-0`}>
+          <div className="sticky top-0 z-10 border-b border-line bg-surface/95 p-5 backdrop-blur">
+            <div className="flex items-start justify-between gap-4">
+              <Link to={`/courses/${course.slug}`} className="flex min-w-0 items-center gap-3">
+                <CourseBadge code={course.code} className="h-12 w-12" />
+                <span className="min-w-0">
+                  <small className="font-black text-brand-ink">{t('learn.backToCourse')}</small>
+                  <strong dir="ltr" className="mt-0.5 block truncate text-start font-inter text-sm font-black rtl:text-right">{pick(course, 'title')}</strong>
+                </span>
+              </Link>
+              <button type="button" onClick={() => setSidebarOpen(false)} className="lg:hidden" aria-label={t('learn.closeList')}><X className="h-5 w-5" /></button>
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-subtle"><div className="h-full rounded-full bg-brand" style={{ width: `${progress}%` }} /></div>
+              <span className="text-xs font-black text-muted">{progress}%</span>
+            </div>
           </div>
-          <div className="p-3">{course.modules.map((module, moduleIndex) => <div key={module.id} className="mb-5"><h2 className="px-3 py-2 text-xs font-black text-white/40">الوحدة {moduleIndex + 1} · {module.title}</h2>{module.lessons.map((item) => { const active = item.id === lesson.id; const done = completed.has(item.id); return <button key={item.id} type="button" onClick={() => { navigate(`/learn/${course.slug}/${item.id}`); setSidebarOpen(false); }} className={`${active ? 'bg-white text-[#171c1e]' : 'text-white/70 hover:bg-white/5'} mb-1 flex w-full items-center gap-3 rounded-xl p-3 text-right transition`}><span className={`${done ? 'bg-[#1bb89d] text-white' : active ? 'bg-[#fff0e9] text-[#ff7438]' : 'bg-white/10 text-white/50'} grid h-8 w-8 shrink-0 place-items-center rounded-lg`}>{done ? <Check className="h-4 w-4" /> : <Circle className="h-3 w-3" />}</span><span className="min-w-0 flex-1"><strong className="block truncate text-sm">{item.title}</strong><small className={`${active ? 'text-slate-400' : 'text-white/30'} mt-1 block`}>{item.duration}</small></span></button>; })}</div>)}</div>
+
+          <ol className="p-3">
+            {lessons.map((item, index) => {
+              const active = item.id === lesson.id;
+              const done = completed.has(item.id);
+              const itemClock = formatClock(item.durationSeconds);
+              return (
+                <li key={item.id}>
+                  <button type="button" onClick={() => { navigate(`/learn/${course.slug}/${item.id}`); setSidebarOpen(false); }} aria-current={active ? 'true' : undefined} className={`${active ? 'bg-brand-soft ring-1 ring-glory-500/40' : 'hover:bg-subtle'} mb-1 flex w-full items-center gap-3 rounded-xl p-3 text-start transition`}>
+                    <span className={`${done ? 'bg-glory-600 text-white' : active ? 'bg-surface text-brand-ink' : 'bg-subtle text-muted'} grid h-8 w-8 shrink-0 place-items-center rounded-lg font-inter text-xs font-black`}>
+                      {done ? <Check className="h-4 w-4" /> : index + 1}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <strong dir="ltr" className={`${active ? 'text-ink' : 'text-ink/80'} block truncate text-start font-inter text-sm rtl:text-right`}>{pick(item, 'title')}</strong>
+                      {itemClock && <small className="mt-0.5 block font-inter text-xs text-muted">{itemClock}</small>}
+                    </span>
+                    {!done && active && <Circle className="h-3 w-3 shrink-0 fill-current text-brand" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
         </aside>
 
-        {sidebarOpen && <button type="button" aria-label="إغلاق قائمة الدروس" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden" />}
+        {sidebarOpen && <button type="button" aria-label={t('learn.closeList')} onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-40 bg-black/50 lg:hidden" />}
 
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-7 lg:px-10 lg:py-9">
-          <button type="button" onClick={() => setSidebarOpen(true)} className="mb-5 inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-black lg:hidden"><Menu className="h-5 w-5" /> قائمة الدروس</button>
-          <LessonPlayer lesson={lesson} />
+          <button type="button" onClick={() => setSidebarOpen(true)} className="btn-secondary mb-5 px-4 py-2 text-sm lg:hidden"><Menu className="h-5 w-5" /> {t('learn.lessonsList')}</button>
+          <LessonPlayer
+            lesson={lesson}
+            course={course}
+            startAt={positions[lesson.id] || 0}
+            onProgress={(seconds) => saveLessonPosition(user?.id, lesson.id, seconds)}
+          />
+
           <div className="mx-auto max-w-5xl py-7">
-            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start"><div><span className="text-xs font-black text-[#1bb89d]">الدرس {lessonIndex + 1} من {allLessons.length}</span><h2 className="mt-2 text-2xl font-black sm:text-3xl">{lesson.title}</h2><p className="mt-3 text-sm font-medium text-white/45">مدة الدرس: {lesson.duration}</p></div><button type="button" disabled={saving || completed.has(lesson.id)} onClick={markComplete} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#1bb89d] px-6 py-3.5 font-black text-white disabled:bg-white/10 disabled:text-white/50">{completed.has(lesson.id) ? <><CheckCircle2 className="h-5 w-5" /> مكتمل</> : saving ? 'جارٍ الحفظ…' : <>{nextLesson ? 'أكمل وانتقل للتالي' : 'أكمل الكورس'} <ChevronLeft className="h-5 w-5" /></>}</button></div>
-            {isDemo && <p className="mt-7 rounded-xl border border-[#ff7438]/20 bg-[#ff7438]/10 px-4 py-3 text-xs font-bold text-orange-200">وضع المعاينة: الإنجاز يبقى في هذه الجلسة فقط إلى أن يتم ربط Supabase.</p>}
-            {progressError && <p className="mt-7 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-xs font-bold text-red-200" role="alert">{progressError}</p>}
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[.04] p-6"><div className="flex items-center gap-3"><ListVideo className="h-6 w-6 text-[#ff7438]" /><h3 className="font-black">عن هذا الدرس</h3></div><p className="mt-4 text-sm font-medium leading-8 text-white/55">تابع الشرح، طبّق الخطوات داخل مختبرك، ثم علّم الدرس كمكتمل. يمكنك الرجوع إليه في أي وقت من لوحة الطالب.</p></div>
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+              <div className="min-w-0">
+                <span className="text-xs font-black text-brand-ink">{t('learn.lessonOf', { current: lessonIndex + 1, total: lessons.length })}</span>
+                <h1 dir="ltr" className="mt-2 text-start font-inter text-2xl font-black sm:text-3xl rtl:text-right">{pick(lesson, 'title')}</h1>
+                {clock && <p className="mt-3 text-sm font-medium text-muted">{t('learn.duration', { value: clock })}</p>}
+              </div>
+              <button type="button" disabled={saving || isDone} onClick={markComplete} className={`btn-primary shrink-0 ${isDone ? '!bg-brand-soft !text-brand-ink disabled:opacity-100' : ''}`}>
+                {isDone
+                  ? <><CheckCircle2 className="h-5 w-5" /> {t('learn.completed')}</>
+                  : saving
+                    ? t('common.saving')
+                    : <>{nextLesson ? t('learn.completeNext') : t('learn.completeCourse')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" /></>}
+              </button>
+            </div>
+            {isDemo && <p className="mt-7 rounded-xl border border-glory-500/30 bg-brand-soft px-4 py-3 text-xs font-bold text-brand-ink">{t('learn.demoNote')}</p>}
+            {progressError && <p className="mt-7 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-700 dark:text-red-300" role="alert">{progressError}</p>}
+            <div className="mt-8">
+              <LessonResources resources={resources} title={t('learn.resources')} emptyText={t('learn.noResources')} />
+            </div>
+            <div className="card mt-6 p-6">
+              <div className="flex items-center gap-3"><ListVideo className="h-6 w-6 text-brand" /><h2 className="font-black">{t('learn.aboutTitle')}</h2></div>
+              <p className="mt-4 text-sm font-medium leading-8 text-muted">{t('learn.aboutText')}</p>
+            </div>
           </div>
         </main>
       </div>

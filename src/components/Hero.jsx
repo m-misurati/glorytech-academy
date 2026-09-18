@@ -1,60 +1,60 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { site } from '../config/site';
+import { useI18n } from '../i18n/I18nContext';
+import CourseBadge from './CourseBadge';
+import { TelegramIcon } from './icons';
 
 export default function Hero() {
-  return (
-    <section id="home" className="relative overflow-hidden bg-[#fbefec] pt-20">
-      <div className="absolute right-[42%] top-36 h-3 w-3 rounded-full bg-[#ff7438]" />
-      <div className="absolute left-[45%] top-40 h-4 w-4 rounded-full bg-[#1bb89d]" />
+  const { t } = useI18n();
 
-      <div className="relative mx-auto grid min-h-[720px] max-w-7xl items-center gap-8 px-5 py-14 lg:grid-cols-[.94fr_1.06fr] lg:px-8 lg:py-20">
-        <motion.div initial={{ opacity: 0, x: 28 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65 }} className="relative z-10 order-1 lg:order-2">
-          <span className="inline-block -rotate-2 rounded-full bg-[#ff7438] px-4 py-2 text-sm font-black text-white shadow-sm">
-            منصة تعليم تقني عربية
+  return (
+    <section id="home" className="relative overflow-hidden bg-canvas">
+      <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(rgb(var(--line))_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_75%)]" />
+      <div className="pointer-events-none absolute -top-40 end-[-10rem] h-[32rem] w-[32rem] rounded-full bg-glory-500/10 blur-3xl" />
+
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 pt-12 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:pb-20 lg:pt-16">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+          <span className="section-tag">
+            <span className="h-2 w-2 rounded-full bg-brand" />
+            {t('hero.badge')}
           </span>
 
-          <h1 className="mt-7 max-w-2xl text-[3rem] font-black leading-[1.08] tracking-[-0.05em] text-[#161b1d] sm:text-6xl lg:text-[4.65rem]">
-            تعلّم أذكى.
-            <br />
-            افهم أعمق.
-            <br />
-            وابدأ <span className="text-[#ff7438]">بثقة.</span>
+          <h1 className="mt-6 text-4xl font-black leading-[1.3] text-ink sm:text-5xl lg:text-[2.9rem]">
+            {t('hero.titleLine1')}
+            <span className="mt-1 block text-brand-ink">{t('hero.titleLine2')}</span>
           </h1>
 
-          <p className="mt-7 max-w-xl text-lg font-medium leading-9 text-[#51595b]">
-            GloryTech Academy تنقلك من فهم الأساسيات إلى التطبيق الحقيقي، مع المهندس محمد بشير المصراتي ومسارات شبكات مرتبة وواضحة.
-          </p>
+          <p className="mt-6 max-w-xl text-lg font-medium leading-9 text-muted">{t('hero.intro')}</p>
 
-          <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <a href="#courses" className="group inline-flex items-center justify-center gap-3 rounded-full bg-[#1bb89d] px-7 py-4 font-black text-white shadow-lg shadow-teal-700/15 transition hover:-translate-y-1 hover:bg-[#119b84]">
-              ابدأ مجاناً
-              <ArrowLeft className="h-5 w-5 transition group-hover:-translate-x-1" />
-            </a>
-            <a href="#instructor" className="inline-flex items-center justify-center gap-3 px-3 py-3 font-black text-[#181d1f]">
-              <span className="grid h-12 w-12 place-items-center rounded-full bg-[#ff7438] text-white shadow-lg shadow-orange-500/20"><Play className="mr-0.5 h-5 w-5 fill-current" /></span>
-              كيف تتعلّم معنا؟
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link to={{ pathname: '/', hash: '#courses' }} className="btn-primary px-7 py-4 shadow-lg shadow-glory-900/10">
+              {t('hero.ctaPrimary')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" />
+            </Link>
+            <a href={site.telegramUrl} target="_blank" rel="noreferrer" className="btn-secondary px-7 py-4">
+              <TelegramIcon className="h-5 w-5 text-[#229ED9]" /> {t('hero.ctaTelegram')}
             </a>
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, x: -28 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.7 }} className="relative order-2 mx-auto w-full max-w-[560px] self-end lg:order-1">
-          <img src="/assets/mohamed-bashir-cutout.png" alt="المهندس محمد بشير المصراتي" className="relative z-10 mx-auto h-[520px] w-full object-contain object-bottom sm:h-[650px]" />
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }} className="relative mx-auto w-full max-w-xl lg:max-w-none">
+          <div className="absolute -bottom-4 -end-4 top-8 start-8 rounded-[2.25rem] bg-glory-500/15" />
+          <img src="/assets/hero-instructor.jpg" alt={t('hero.imageAlt')} className="relative aspect-[5/4] w-full rounded-[2rem] object-cover shadow-2xl shadow-black/15" />
+
+          <div className="absolute -bottom-6 start-4 flex items-center gap-3 rounded-2xl border border-line bg-surface p-3 pe-5 shadow-xl sm:start-6">
+            <div className="flex gap-1.5">
+              <CourseBadge code="CCNA 1" className="h-12 w-12" />
+              <CourseBadge code="CCNA 4" className="h-12 w-12" />
+            </div>
+            <div>
+              <strong className="block text-sm font-black text-ink">{t('hero.cardFreeTitle')}</strong>
+              <span className="text-xs font-black text-brand-ink">{t('hero.cardFreeText')}</span>
+            </div>
+          </div>
         </motion.div>
       </div>
 
-      <div className="border-t border-black/5 bg-[#f7f9fb]">
-        <div className="mx-auto max-w-6xl px-5 py-20 text-center lg:px-8">
-          <span className="inline-block -rotate-2 rounded-full bg-[#1bb89d] px-4 py-1.5 text-xs font-black text-white">من نحن</span>
-          <h2 className="mx-auto mt-6 max-w-4xl text-2xl font-black leading-[1.7] text-[#171c1e] sm:text-3xl">
-            شغفنا أن نجعل تعلّم الشبكات <span className="text-[#6d7476]">واضحاً، عملياً ومتاحاً للجميع</span> — ونبني مكتبة كورسات تكبر معكم خطوة بخطوة.
-          </h2>
-          <div className="mx-auto mt-12 grid max-w-3xl grid-cols-3 divide-x divide-x-reverse divide-slate-200">
-            <div className="px-3"><strong className="block text-3xl font-black text-[#151a1c] sm:text-5xl">2</strong><span className="mt-2 block text-xs font-bold text-slate-500 sm:text-sm">كورسات حالياً</span></div>
-            <div className="px-3"><strong className="block text-3xl font-black text-[#151a1c] sm:text-5xl">100%</strong><span className="mt-2 block text-xs font-bold text-slate-500 sm:text-sm">مجانية</span></div>
-            <div className="px-3"><strong className="block text-3xl font-black text-[#151a1c] sm:text-5xl">1</strong><span className="mt-2 block text-xs font-bold text-slate-500 sm:text-sm">مدرّب خبير</span></div>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

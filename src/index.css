@@ -2,17 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens (space-separated RGB so Tailwind can apply opacity). */
+:root {
+  color-scheme: light;
+  --canvas: 255 255 255;
+  --surface: 255 255 255;
+  --subtle: 245 248 246;
+  --ink: 15 26 21;
+  --muted: 91 103 98;
+  --line: 227 234 230;
+  --brand: 0 169 92;
+  --brand-ink: 0 122 66;
+  --brand-soft: 232 248 239;
+  /* Chart series: instructor share, platform share. */
+  --series-1: #00a95c;
+  --series-2: #2a78d6;
+}
+
+.dark {
+  color-scheme: dark;
+  --canvas: 10 16 14;
+  --surface: 17 25 22;
+  --subtle: 14 21 18;
+  --ink: 232 239 235;
+  --muted: 148 163 156;
+  --line: 36 49 43;
+  --brand: 0 169 92;
+  --brand-ink: 61 209 131;
+  --brand-soft: 13 42 29;
+  --series-1: #00a95c;
+  --series-2: #3987e5;
+}
+
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
 }
 
 body {
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Cairo', 'Inter', sans-serif;
   margin: 0;
-  background-color: #f7f9fb;
-  color: #171c1e;
+  background-color: rgb(var(--canvas));
+  color: rgb(var(--ink));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html[lang='en'] body {
+  font-family: 'Inter', 'Cairo', sans-serif;
 }
 
 * {
@@ -20,7 +57,7 @@ body {
 }
 
 ::selection {
-  background-color: #1bb89d;
+  background-color: #00a95c;
   color: #ffffff;
 }
 
@@ -38,7 +75,7 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid rgba(27, 184, 157, 0.45);
+  outline: 3px solid rgb(0 169 92 / 0.45);
   outline-offset: 3px;
 }
 
@@ -48,16 +85,44 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f7f9fb;
+  background: rgb(var(--subtle));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1bb89d;
+  background: #00a95c;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #119b84;
+  background: #008548;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-glory-600 px-6 py-3.5 font-black text-white transition hover:bg-glory-700 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-6 py-3.5 font-black text-ink transition hover:border-glory-500 hover:text-brand-ink disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-surface;
+  }
+
+  .field {
+    @apply flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 focus-within:border-glory-500 focus-within:ring-4 focus-within:ring-glory-500/15;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    @apply w-full bg-transparent font-bold text-ink outline-none placeholder:text-muted/70;
+  }
+
+  .section-tag {
+    @apply inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-1.5 text-xs font-black text-brand-ink;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,20 +4,32 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/assets/glorytech-mark.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fbefec" />
-    <meta name="description" content="GloryTech Academy — كورسات شبكات عربية مجانية مع المهندس محمد بشير المصراتي، ومتابعة كاملة من داخل المنصة." />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="GloryTech Academy — منصة عربية تجمع نخبة من المدربين المحترفين. ابدأ بكورسات CCNA المجانية بالكامل." />
     <meta property="og:title" content="GLORYTECH ACADEMY" />
-    <meta property="og:description" content="تعلّم الشبكات باحتراف" />
+    <meta property="og:description" content="نخبة من المدربين المحترفين — كورسات CCNA مجانية بالكامل" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/og.png" />
+    <meta property="og:image" content="/og.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="GLORYTECH ACADEMY" />
-    <meta name="twitter:description" content="تعلّم الشبكات باحتراف" />
-    <meta name="twitter:image" content="/og.png" />
-    <title>GloryTech Academy — تعلّم الشبكات باحتراف</title>
+    <meta name="twitter:description" content="نخبة من المدربين المحترفين — كورسات CCNA مجانية بالكامل" />
+    <meta name="twitter:image" content="/og.jpg" />
+    <title>GloryTech Academy — نخبة من المدربين المحترفين</title>
+    <script>
+      // Apply saved theme and language before first paint to avoid a flash.
+      try {
+        var theme = localStorage.getItem('glory-theme');
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+        var lang = localStorage.getItem('glory-lang');
+        if (lang === 'en') {
+          document.documentElement.lang = 'en';
+          document.documentElement.dir = 'ltr';
+        }
+      } catch (error) {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>

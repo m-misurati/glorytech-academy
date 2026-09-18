@@ -1,12 +1,15 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { getMyRoles, isSupabaseConfigured, supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
+const NO_ROLES = { isAdmin: false, instructor: null };
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [demoUser, setDemoUser] = useState(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [roles, setRoles] = useState(NO_ROLES);
+  const [rolesLoading, setRolesLoading] = useState(isSupabaseConfigured);
 
   useEffect(() => {
     if (!supabase) {
@@ -33,8 +36,27 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  // Roles are fetched outside the auth callback; supabase-js must not be awaited inside it.
+  const sessionUserId = session?.user?.id;
+  useEffect(() => {
+    if (loading) return undefined;
+    if (!sessionUserId) {
+      setRoles(NO_ROLES);
+      setRolesLoading(false);
+      return undefined;
+    }
+    let active = true;
+    setRolesLoading(true);
+    getMyRoles().then((nextRoles) => {
+      if (!active) return;
+      setRoles(nextRoles);
+      setRolesLoading(false);
+    });
+    return () => { active = false; };
+  }, [sessionUserId, loading]);
+
   const sendOtp = async (email, { shouldCreateUser = false, profile = null } = {}) => {
-    if (!supabase) throw new Error('لم يتم ربط مشروع Supabase بعد.');
+    if (!supabase) throw new Error('supabase_missing');
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -50,14 +72,14 @@ export function AuthProvider({ children }) {
   };
 
   const verifyOtp = async (email, token) => {
-    if (!supabase) throw new Error('لم يتم ربط مشروع Supabase بعد.');
+    if (!supabase) throw new Error('supabase_missing');
     const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
     if (error) throw error;
     return data;
   };
 
   const enterDemo = (profile = {}) => {
-    const user = { id: 'demo-user', email: 'student@glorytech.demo', user_metadata: { display_name: profile.displayName || 'طالب تجريبي', phone: profile.phone || null, affiliation: profile.affiliation || null }, isDemo: true };
+    const user = { id: 'demo-user', email: 'student@glorytech.demo', user_metadata: { display_name: profile.displayName || null, phone: profile.phone || null, affiliation: profile.affiliation || null }, isDemo: true };
     setDemoUser(user);
     return user;
   };
@@ -69,8 +91,20 @@ export function AuthProvider({ children }) {
 
   const user = session?.user ?? demoUser;
   const value = useMemo(
-    () => ({ user, session, loading, isDemo: Boolean(demoUser), isConfigured: isSupabaseConfigured, sendOtp, verifyOtp, enterDemo, signOut }),
-    [user, session, loading, demoUser],
+    () => ({
+      user,
+      session,
+      loading,
+      roles,
+      rolesLoading: loading || rolesLoading,
+      isDemo: Boolean(demoUser),
+      isConfigured: isSupabaseConfigured,
+      sendOtp,
+      verifyOtp,
+      enterDemo,
+      signOut,
+    }),
+    [user, session, loading, roles, rolesLoading, demoUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
