@@ -30,10 +30,7 @@ export default function LearnPage() {
   const lessonIndex = lessons.findIndex((item) => item.id === lessonId);
   const lesson = lessons[lessonIndex];
   const nextLesson = lessons[lessonIndex + 1];
-  const courseLessonIds = useMemo(() => new Set(lessons.map((item) => item.id)), [lessons]);
   usePageMeta({ title: lesson ? pick(lesson, 'title') : undefined });
-  const completedHere = [...completed].filter((id) => courseLessonIds.has(id)).length;
-  const progress = lessons.length ? Math.round((completedHere / lessons.length) * 100) : 0;
 
   useEffect(() => {
     let active = true;
@@ -102,10 +99,6 @@ export default function LearnPage() {
                 </span>
               </Link>
               <button type="button" onClick={() => setSidebarOpen(false)} className="lg:hidden" aria-label={t('learn.closeList')}><X className="h-5 w-5" /></button>
-            </div>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-subtle"><div className="h-full rounded-full bg-brand" style={{ width: `${progress}%` }} /></div>
-              <span className="text-xs font-black text-muted">{progress}%</span>
             </div>
           </div>
 

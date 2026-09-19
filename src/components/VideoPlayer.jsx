@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Gauge, Loader2, Maximize, Minimize, Pause, Play, RotateCcw, RotateCw, Volume2, VolumeX } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext';
+import SeekPreview from './SeekPreview';
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 const HIDE_CONTROLS_AFTER_MS = 2500;
@@ -23,7 +24,9 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
   const lastReported = useRef(0);
   const codecChecked = useRef(false);
   const [playing, setPlaying] = useState(false);
-  const [waiting, setWaiting] = useState(false);
+  const [waiting, setWaiting] = useState(true);
+  const [hover, setHover] = useState(null);
+  const [previewArmed, setPreviewArmed] = useState(false);
   const [failed, setFailed] = useState(false);
   const [noVideoTrack, setNoVideoTrack] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -38,8 +41,10 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
 
   useEffect(() => {
     setFailed(false);
-    setWaiting(false);
+    setWaiting(true);
     setNoVideoTrack(false);
+    setHover(null);
+    setPreviewArmed(false);
     codecChecked.current = false;
   }, [src]);
 
@@ -168,6 +173,7 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
         onLoadedMetadata={(event) => {
           const video = event.currentTarget;
           setDuration(video.duration);
+          setWaiting(false);
           video.playbackRate = speed;
           if (resumeAt.current > 0) {
             video.currentTime = resumeAt.current;
@@ -200,8 +206,12 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
       />
 
       {waiting && !failed && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center">
-          <Loader2 className="h-12 w-12 animate-spin text-white/80" />
+        <div dir={dir} className="pointer-events-none absolute inset-0 grid place-items-center">
+          <div className="text-center">
+            <Loader2 className="mx-auto h-12 w-12 animate-spin text-white/80" />
+            {/* Until metadata arrives there is nothing to play; say so instead of a bare black box. */}
+            {!duration && <p className="mt-4 text-sm font-bold text-white/70">{t('player.preparing')}</p>}
+          </div>
         </div>
       )}
 
@@ -234,8 +244,21 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
       )}
 
       <div className={`${showControls && !failed ? 'opacity-100' : 'pointer-events-none opacity-0'} absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-4 pb-3 pt-12 text-white transition-opacity duration-300`}>
-        <div className="relative h-4">
-          <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 overflow-hidden rounded-full bg-white/20">
+        <div
+          className="group/seek relative h-4"
+          onMouseMove={(event) => {
+            if (!duration) return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1);
+            setHover({ ratio, time: ratio * duration });
+            setPreviewArmed(true);
+          }}
+          onMouseLeave={() => setHover(null)}
+        >
+          {previewArmed && (
+            <SeekPreview src={src} time={hover?.time ?? 0} ratio={hover?.ratio ?? 0} visible={Boolean(hover)} />
+          )}
+          <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 overflow-hidden rounded-full bg-white/20 transition-[height] group-hover/seek:h-2.5">
             <div className="absolute inset-y-0 left-0 bg-white/30" style={{ width: `${buffered * 100}%` }} />
             <div className="absolute inset-y-0 left-0 bg-glory-500" style={{ width: `${played * 100}%` }} />
           </div>

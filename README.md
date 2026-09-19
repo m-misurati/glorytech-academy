@@ -29,7 +29,8 @@ The landing page markets sixteen upcoming tracks from `src/data/upcoming.js` (CC
 - Optional school, university, or employer field
 - Protected student dashboard and lesson routes
 - Free-course enrollment and per-lesson completion tracking
-- Custom video player streaming lessons through the Worker (source URL never reaches the browser)
+- Custom video player streaming lessons through the Worker (source URL never reaches the browser), with a thumbnail preview when hovering the seek bar
+- Real lesson durations read from the uploaded video files
 - Instructor profiles with their certifications and linked courses
 - Instructor portal: create courses, manage lessons, attach the Google Drive video and downloadable resources, learners, analytics and earnings
 - Lecture slides attached under each lesson inside the player, with open and download buttons
@@ -239,6 +240,7 @@ Migrations are stored in `supabase/migrations` and currently cover:
 5. Instructor portal: course/lesson authoring policies, lesson videos on Google Drive, downloadable lesson resources
 6. CCNA 1 lesson videos: the Drive file id for the introduction and the seventeen modules
 7. CCNA 1 and CCNA 4 lesson videos (re-uploaded H.264 files) plus the slide deck attached to every lesson
+8. Real lesson durations and course totals
 
 `supabase/schema.sql` is the same schema as a single idempotent script for the SQL Editor. After your account signs up, run `supabase/snippets/grant-owner-roles.sql` to make it an admin and link it to the instructor profile.
 
