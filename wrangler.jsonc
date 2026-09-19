@@ -6,7 +6,9 @@
   // Public values. Secrets (STREAM_SIGNING_SECRET, SUPABASE_SERVICE_ROLE_KEY) go through `wrangler secret put`.
   "vars": {
     "SUPABASE_URL": "https://icmzrmzwomnnjojzaafq.supabase.co",
-    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xYS9uFaMfZjjF7kZFgXEIQ_N1IYBggy"
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xYS9uFaMfZjjF7kZFgXEIQ_N1IYBggy",
+    // Sites on other hosting (e.g. LibyanSpider cPanel) that may call /api/*. Comma-separated.
+    "ALLOWED_ORIGINS": "https://academy.glorytech.ly"
   },
   "observability": { "enabled": true },
   "assets": {

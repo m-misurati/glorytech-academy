@@ -54,6 +54,11 @@ export async function getUserProgress(userId) {
     .eq('user_id', userId);
 }
 
+// Where the Worker lives. Empty when the Worker also serves the site (Cloudflare);
+// set to e.g. https://glorytech-academy.<account>.workers.dev when the site is on
+// other hosting such as cPanel.
+const API_BASE = (import.meta.env.VITE_API_BASE || '').trim().replace(/\/+$/, '');
+
 // Asks the Worker for a short-lived stream URL. status: ready | no_media | not_found | not_enrolled | unauthorized | error
 export async function requestLessonPlayback(lessonId) {
   if (!supabase) return { status: 'unauthorized' };
@@ -63,12 +68,13 @@ export async function requestLessonPlayback(lessonId) {
   if (!accessToken) return { status: 'unauthorized' };
 
   try {
-    const response = await fetch(`/api/lessons/${encodeURIComponent(lessonId)}/playback`, {
+    const response = await fetch(`${API_BASE}/api/lessons/${encodeURIComponent(lessonId)}/playback`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const body = await response.json().catch(() => ({}));
-    if (response.ok) return { status: 'ready', url: body.url, expiresAt: body.expiresAt };
+    // The Worker answers with a path; it must point back at the Worker, not at the site.
+    if (response.ok) return { status: 'ready', url: `${API_BASE}${body.url}`, expiresAt: body.expiresAt };
     if (['no_media', 'not_found', 'not_enrolled', 'unauthorized'].includes(body.error)) return { status: body.error };
     return { status: 'error' };
   } catch {

@@ -11,8 +11,10 @@ export default {
 
     const playbackMatch = pathname.match(/^\/api\/lessons\/([^/]+)\/playback$/)
     if (playbackMatch) {
-      if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
-      return handlePlayback(request, env, playbackMatch[1])
+      // The site may be hosted elsewhere (cPanel), so the browser asks first.
+      if (request.method === 'OPTIONS') return withCors(request, env, new Response(null, { status: 204 }))
+      if (request.method !== 'POST') return withCors(request, env, json({ error: 'method_not_allowed' }, 405))
+      return withCors(request, env, await handlePlayback(request, env, playbackMatch[1]))
     }
 
     const streamMatch = pathname.match(/^\/api\/stream\/([^/]+)$/)
@@ -284,6 +286,23 @@ function supabaseFetch(env, path, accessToken) {
       Authorization: `Bearer ${accessToken}`,
     },
   })
+}
+
+// Only origins listed in ALLOWED_ORIGINS (comma-separated) may call the API from
+// another domain. When the Worker serves the site itself, requests are same-origin
+// and no header is needed. Video bytes need no CORS: <video> loads them like an image.
+function withCors(request, env, response) {
+  const origin = request.headers.get('Origin')
+  const allowed = (env.ALLOWED_ORIGINS || '').split(',').map((value) => value.trim().replace(/\/+$/, '')).filter(Boolean)
+  if (!origin || !allowed.includes(origin)) return response
+
+  const headers = new Headers(response.headers)
+  headers.set('Access-Control-Allow-Origin', origin)
+  headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  headers.set('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+  headers.set('Access-Control-Max-Age', '86400')
+  headers.append('Vary', 'Origin')
+  return new Response(response.body, { status: response.status, headers })
 }
 
 function json(body, status = 200) {

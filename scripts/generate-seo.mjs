@@ -10,8 +10,14 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 function readSiteUrl() {
   if (process.env.VITE_SITE_URL) return process.env.VITE_SITE_URL.trim().replace(/\/$/, '');
   try {
-    const line = readFileSync(join(root, '.env'), 'utf8').split(/\r?\n/).find((item) => item.startsWith('VITE_SITE_URL='));
-    return (line?.split('=')[1] || '').trim().replace(/\/$/, '');
+    // Like dotenv, a later line wins over an earlier one.
+    const last = readFileSync(join(root, '.env'), 'utf8')
+      .split(/\r?\n/)
+      .filter((item) => item.startsWith('VITE_SITE_URL='))
+      .map((item) => item.slice('VITE_SITE_URL='.length).trim())
+      .filter(Boolean)
+      .at(-1);
+    return (last || '').replace(/\/$/, '');
   } catch {
     return '';
   }

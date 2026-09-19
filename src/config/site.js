@@ -2,7 +2,7 @@
 export const site = {
   telegramUrl: 'https://t.me/glorytechacademy',
   telegramHandle: '@glorytechacademy',
-  email: import.meta.env.VITE_CONTACT_EMAIL?.trim() || 'info@glorytecho.ly',
+  email: import.meta.env.VITE_CONTACT_EMAIL?.trim() || 'info@glorytech.ly',
   phone: '+218917310458',
   phoneDisplay: '+218 91 731 0458',
 };
