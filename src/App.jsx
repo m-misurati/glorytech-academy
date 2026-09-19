@@ -19,6 +19,7 @@ const CourseEditorPage = lazy(() => import('./pages/CourseEditorPage'));
 const TeachingDashboardPage = lazy(() => import('./pages/TeachingDashboardPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const TeachPage = lazy(() => import('./pages/TeachPage'));
+const B2BPage = lazy(() => import('./pages/B2BPage'));
 
 function RouteFallback() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
               <Route path="/instructors/:slug" element={<InstructorPage />} />
               <Route path="/legal/:page" element={<LegalPage />} />
               <Route path="/teach" element={<TeachPage />} />
+              <Route path="/b2b" element={<B2BPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/learn/:slug/:lessonId" element={<ProtectedRoute><LearnPage /></ProtectedRoute>} />
               <Route path="/instructor" element={<ProtectedRoute role="instructor"><TeachingDashboardPage /></ProtectedRoute>} />

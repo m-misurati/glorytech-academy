@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Clock3, Play } from 'lucide-react';
+import { ArrowRight, BookOpen, Clock3, Play, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCatalog } from '../context/CatalogContext';
 import { getFirstLesson } from '../data/courses';
@@ -41,9 +41,14 @@ export default function CourseCard({ course, dashboard = false, progress = 0 }) 
         <h3 dir="ltr" className="mt-2 text-start font-inter text-xl font-black leading-snug text-ink rtl:text-right">{title}</h3>
         <p className="mt-2 line-clamp-3 text-[13px] font-medium leading-6 text-muted">{pick(course, 'description')}</p>
 
-        <div className="mt-4 flex flex-wrap gap-4 border-y border-line py-3 text-[11px] font-bold text-muted">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-line py-3 text-[11px] font-bold text-muted">
           <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-brand" /> {t('common.lessons', { count: course.lessonsCount })}</span>
           {duration && <span className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-brand" /> {duration}</span>}
+          <span className="flex items-center gap-2 ms-auto">
+            <Tag className="h-4 w-4 text-brand" />
+            <span>{t('courses.priceLabel')}:</span>
+            <strong className="font-black text-brand-ink">{course.isFree ? t('courses.freePrice') : formatMoney(course.price)}</strong>
+          </span>
         </div>
 
         {dashboard && (

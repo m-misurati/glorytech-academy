@@ -13,15 +13,17 @@ The platform brings together professional instructors, starting with Eng. Mohame
 | CCNA1: Introduction to Networks | Available · Free · 18 lessons | Beginner |
 | CCNA 4: Connecting Networks | Available · Free · 10 lessons | Intermediate |
 
-The landing page also markets upcoming tracks (CCNP Enterprise, Fortinet NSE 4, Red Hat, SD-WAN, VMware, Ansible, Cloud, Kubernetes, Docker, DevOps, CI/CD, Programming) from `src/data/upcoming.js`.
+Both courses stream their full lesson videos from Google Drive and attach the matching slide deck to each lesson as a download.
+
+The landing page markets sixteen upcoming tracks from `src/data/upcoming.js` (CCNA 200-301, CCNP Enterprise, Red Hat Admin, VMware vSphere, Proxmox, Network Automation, Fortinet NSE 4, Kubernetes, Docker, Ansible, CI/CD, Terraform, Azure AZ-900, Python, SD-WAN, CompTIA Security+).
 
 ## Current Features
 
 - Arabic and English interface (`src/i18n`), with RTL/LTR layout switching
 - Light (default) and dark themes across every page
-- Responsive landing page: courses, upcoming tracks, instructors, Telegram channel, FAQ, contact
+- Responsive landing page: courses, upcoming tracks, instructors, Telegram channel, contact
 - Searchable, database-ready course listing
-- Course details, modules, lessons, and learning outcomes
+- Course details, modules, lessons, and learning outcomes; every lesson in a free course opens directly from the course page
 - Passwordless email OTP registration and sign-in flow
 - Required full name, phone number, and email during registration
 - Optional school, university, or employer field
@@ -30,8 +32,13 @@ The landing page also markets upcoming tracks (CCNP Enterprise, Fortinet NSE 4, 
 - Custom video player streaming lessons through the Worker (source URL never reaches the browser)
 - Instructor profiles with their certifications and linked courses
 - Instructor portal: create courses, manage lessons, attach the Google Drive video and downloadable resources, learners, analytics and earnings
-- Downloadable lesson resources (slides, PDFs) with a direct download link
+- Lecture slides attached under each lesson inside the player, with open and download buttons
 - Admin dashboard: platform KPIs, course settings (price, split, publishing), learners, instructor settlement, payments and payouts
+- Dedicated corporate training page (`/b2b`): delivery formats, a catalogue of 50+ tracks across seven fields, pricing policy and a prefilled request email
+- Dedicated instructor recruiting page (`/teach`): fields, requirements and joining steps
+- Price shown as an explicit field on course cards (both CCNA courses are free)
+- Terms and privacy consent required before sign-up
+- Player warns when the browser cannot decode a lesson's video codec instead of showing a black screen
 - Local fallback catalog and demo mode when Supabase is not configured
 
 ## Technology Stack
@@ -40,7 +47,7 @@ The landing page also markets upcoming tracks (CCNP Enterprise, Fortinet NSE 4, 
 - Vite 8
 - React Router
 - Tailwind CSS
-- Framer Motion
+- CSS animations (no animation library, keeps the main bundle small)
 - Supabase JS
 - PostgreSQL with Row-Level Security
 - Cloudflare Worker-compatible production build
@@ -59,6 +66,9 @@ The landing page also markets upcoming tracks (CCNP Enterprise, Fortinet NSE 4, 
 | `/instructor/courses/:courseId` | Course, lessons, videos and resources editor |
 | `/admin` | Admin dashboard |
 | `/admin/instructors/:instructorId` | Admin view of one instructor dashboard |
+| `/b2b` | Corporate training (B2B) |
+| `/teach` | Instructor recruiting |
+| `/legal/:page` | Terms of use and privacy policy |
 | `/404` | Not-found page |
 
 ## Backend Status
@@ -130,6 +140,18 @@ Never expose a Supabase secret/service-role key or a Telegram bot token in the f
 ## Video Delivery
 
 The player requests `POST /api/lessons/:id/playback` with the learner session. The Worker (`worker/index.js`) checks the session and enrollment with Supabase, then returns a short-lived signed `/api/stream/:token` URL and proxies the video bytes (with Range support) from the source listed in `worker/media.js`. Lesson videos are stored in `private.lesson_media` (set from the instructor portal) and read by the Worker through `get_lesson_video`, which only the service role may call; `worker/media.js` stays as a fallback. Worker secrets go in `.dev.vars` locally (see `.dev.vars.example`) and `wrangler secret put` in production — including `SUPABASE_SERVICE_ROLE_KEY`.
+
+### Edge caching
+
+Google Drive serves files at only a few hundred KB/s, so the Worker caches video bytes at the Cloudflare edge:
+
+- Range requests are snapped to 4 MB chunks, and each chunk is stored once in the edge cache (7 days).
+- On a cache miss the learner's bytes stream straight from Drive while the chunk is written to the cache in the background (`ctx.waitUntil`), so the first viewer never waits for a whole chunk.
+- The cache key is the Drive file id, not the learner's signed URL, so every learner on the same lesson shares the cached chunks. The browser still receives only a signed, per-learner URL.
+
+Measured locally on a 400 MB lesson: first byte in about 1–2 s on a cold chunk, and about 0.05 s once cached (roughly 400× faster than reading from Drive).
+
+Videos should be H.264 with `+faststart`; see `docs/CONVERT-VIDEOS.md`.
 
 ### Telegram embeds (fallback)
 
@@ -216,6 +238,7 @@ Migrations are stored in `supabase/migrations` and currently cover:
 4. Instructors, admin role, payments/payouts billing, dashboard functions, bilingual fields, and the real CCNA 1 / CCNA 4 lessons
 5. Instructor portal: course/lesson authoring policies, lesson videos on Google Drive, downloadable lesson resources
 6. CCNA 1 lesson videos: the Drive file id for the introduction and the seventeen modules
+7. CCNA 1 and CCNA 4 lesson videos (re-uploaded H.264 files) plus the slide deck attached to every lesson
 
 `supabase/schema.sql` is the same schema as a single idempotent script for the SQL Editor. After your account signs up, run `supabase/snippets/grant-owner-roles.sql` to make it an admin and link it to the instructor profile.
 
@@ -256,13 +279,23 @@ supabase stop
 - Add monitoring, error reporting, and deployment checks
 - Expand the catalog while preserving the database-driven course model
 
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| `docs/DEPLOY.md` | Deploying the Worker and the frontend to Cloudflare |
+| `docs/DEPLOY-LIBYANSPIDER.md` | Deploying onto LibyanSpider cPanel hosting, with the required `.htaccess` |
+| `docs/CONVERT-VIDEOS.md` | Video encoding requirements (H.264 + faststart) and how to convert |
+| `docs/ROADMAP.md` | Planned features beyond the current release |
+
 ## Current Limitations
 
 - Without Supabase environment variables, progress is not persisted.
 - Telegram playback currently supports public post embeds only.
 - Course and lesson content is still managed through migrations or Supabase; the admin dashboard edits price, split and publishing only.
 - Payments are recorded manually by an admin (bank transfer, cash, wallet).
-- CCNA 1 lesson durations are filled in once the compressed videos are uploaded.
+- Lesson videos should be re-exported with `+faststart` so playback can begin without first fetching the end of the file.
+- Edge caching applies per Cloudflare data center; the first learner on a chunk in a region still reads from Drive.
 - Automated application tests have not been added yet.
 
 ## Instructor

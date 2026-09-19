@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { site } from '../config/site';
@@ -15,7 +14,7 @@ export default function Hero() {
       <div className="pointer-events-none absolute -top-40 end-[-10rem] h-[32rem] w-[32rem] rounded-full bg-glory-500/10 blur-3xl" />
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 pt-12 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:pb-20 lg:pt-16">
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+        <div className="animate-rise">
           <span className="section-tag">
             <span className="h-2 w-2 rounded-full bg-brand" />
             {t('hero.badge')}
@@ -36,9 +35,9 @@ export default function Hero() {
               <TelegramIcon className="h-5 w-5 text-[#229ED9]" /> {t('hero.ctaTelegram')}
             </a>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }} className="relative mx-auto w-full max-w-xl lg:max-w-none">
+        <div className="animate-rise relative mx-auto w-full max-w-xl [animation-delay:.1s] lg:max-w-none">
           <div className="absolute -bottom-4 -end-4 top-8 start-8 rounded-[2.25rem] bg-glory-500/15" />
           <img src="/assets/hero-instructor.jpg" alt={t('hero.imageAlt')} className="relative aspect-[5/4] w-full rounded-[2rem] object-cover shadow-2xl shadow-black/15" />
 
@@ -52,7 +51,7 @@ export default function Hero() {
               <span className="text-xs font-black text-brand-ink">{t('hero.cardFreeText')}</span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
     </section>

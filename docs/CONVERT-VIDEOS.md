@@ -1,83 +1,93 @@
-# تحويل محاضرات CCNA 1 إلى ترميز H.264
+# تجهيز مقاطع المحاضرات
 
-## المشكلة
+## المتطلبات
 
-مقاطع CCNA 1 المرفوعة حالياً على Google Drive مُرمَّزة بـ **H.265 (HEVC)** — تأكدنا من ذلك بقراءة رأس الملفات: العلامة `hvc1` موجودة في كل المقاطع التي فحصناها.
+| الخاصية | المطلوب | لماذا |
+| --- | --- | --- |
+| الترميز | **H.264 (AVC)** | يعمل في كل المتصفحات. H.265/HEVC يعطي صوتاً بلا صورة على Chrome وFirefox في ويندوز |
+| الصوت | AAC | مدعوم في كل مكان |
+| الحاوية | MP4 | |
+| الدقة | 1080p | الشرائح والشاشة تحتاج وضوح النص؛ 720p يجعل الكتابة صعبة القراءة |
+| `faststart` | **مفعّل** | بيانات الفهرسة في أول الملف، فيبدأ التشغيل فوراً |
 
-نتيجة ذلك: الصوت يعمل والصورة تبقى سوداء، لأن:
-
-| المتصفح | يفك ترميز H.265؟ |
-| --- | --- |
-| Chrome على ويندوز | غالباً لا (يحتاج إضافة HEVC مدفوعة من مايكروسوفت) |
-| Firefox | لا |
-| Edge على ويندوز | أحياناً، حسب كرت الشاشة |
-| Safari / iPhone / iPad | نعم |
-| Chrome على أندرويد | غالباً نعم |
-
-المشكلة ليست في المنصة ولا في البثّ — المنصة تنقل البايتات كما هي بنجاح (تحققنا: استجابة 206 و`video/mp4`). المتصفح هو الذي لا يستطيع فكّ ترميز الصورة.
-
-**الحل الوحيد الموثوق: إعادة ترميز المقاطع إلى H.264 (AVC) + AAC.** هذا ما تستخدمه يوتيوب ومنصات التعليم كافة كترميز أساسي، ويعمل على كل متصفح وكل جهاز.
+مقاطع CCNA 1 وCCNA 4 الحالية فحصناها: **H.264 و1080p بمعدل 0.4–0.7 ميجابت/ث** — ممتاز. الناقص فقط `faststart`.
 
 ---
 
-## الطريقة الأولى: HandBrake (مثبّت عندك بالفعل)
+## تفعيل faststart (بدون إعادة ترميز)
 
-1. افتح **HandBrake**.
-2. `File → Open Source` واختر مجلد المحاضرات كاملاً (زر **Folder (Batch Scan)**).
-3. من قائمة **Presets** اختر: **Fast 1080p30** (أو **Fast 720p30** لملفات أصغر).
-4. تحت **Summary** تأكد أن **Format = MP4**، وفعّل **Web Optimized**.
-5. تبويب **Video**: تأكد أن `Video Encoder = H.264 (x264)` — **ليس** H.265.
-6. تبويب **Audio**: `Codec = AAC`.
-7. حدّد مجلد إخراج جديد، ثم `Add to Queue → All`، وأخيراً **Start Queue**.
+هذه ليست إعادة ترميز — مجرد نسخ للملف مع نقل الفهرسة لأوله. **ثوانٍ لكل ملف، بلا أي فقد في الجودة.**
 
-بعد الانتهاء: ارفع الملفات الجديدة إلى Google Drive، وبدّل معرّفات الملفات في
-`supabase/migrations/20260919090000_ccna1_lesson_videos.sql` (أو من بوابة المدرّب مباشرة).
+### 1. ثبّت ffmpeg مرة واحدة
 
----
-
-## الطريقة الثانية: ffmpeg (أسرع للدفعات)
-
-ثبّت ffmpeg مرة واحدة:
+افتح **PowerShell** (من قائمة ابدأ اكتب `PowerShell`) ونفّذ:
 
 ```powershell
 winget install Gyan.FFmpeg
 ```
 
-ثم من داخل مجلد المحاضرات:
+بعد انتهاء التثبيت **أغلق PowerShell وافتحه من جديد** حتى يتعرّف على الأمر. تأكد:
 
 ```powershell
-New-Item -ItemType Directory -Force h264
+ffmpeg -version
+```
+
+### 2. ادخل مجلد المقاطع
+
+إذا كانت المقاطع مثلاً في `D:\Videos\CCNA1`:
+
+```powershell
+cd "D:\Videos\CCNA1"
+```
+
+> أسهل طريقة: افتح المجلد في File Explorer، اضغط على شريط العنوان في الأعلى، اكتب `powershell` واضغط Enter — يفتح PowerShell داخل المجلد مباشرة.
+
+### 3. حوّل كل المقاطع دفعة واحدة
+
+انسخ هذا كاملاً والصقه في PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force faststart | Out-Null
 Get-ChildItem *.mp4 | ForEach-Object {
-  ffmpeg -i $_.FullName -c:v libx264 -preset medium -crf 23 -profile:v high -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart "h264\$($_.Name)"
+  ffmpeg -y -loglevel error -i $_.FullName -c copy -movflags +faststart "faststart\$($_.Name)"
+  Write-Host "done: $($_.Name)"
 }
 ```
 
-شرح المعاملات المهمة:
+تظهر الملفات الجاهزة في مجلد `faststart` بنفس الأسماء.
 
-- `-c:v libx264` — الترميز المطلوب، يعمل في كل المتصفحات.
-- `-crf 23` — جودة ممتازة بحجم معقول. قلّلها إلى 20 لجودة أعلى، أو ارفعها إلى 26 لحجم أصغر.
-- `-pix_fmt yuv420p` — ضروري، بدونه بعض المتصفحات تبقى سوداء حتى مع H.264.
-- `-movflags +faststart` — ينقل بيانات الفهرسة لبداية الملف حتى يبدأ التشغيل فوراً بدل تحميل الملف كاملاً.
-- `-c:a aac` — ترميز صوت مدعوم في كل مكان.
+### 4. ارفعها على Google Drive
+
+1. ارفع الملفات من مجلد `faststart` إلى مجلد الكورس على Drive.
+2. تأكد أن المشاركة **Anyone with the link**.
+3. أرسل رابط المجلد، ونحدّث المعرّفات في ملف الترحيل.
 
 ---
 
-## كيف تتأكد أن الملف صار صحيحاً
+## إذا كان المقطع H.265 أصلاً
+
+تحتاج إعادة ترميز فعلية (أبطأ، دقائق لكل ملف):
 
 ```powershell
-ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,pix_fmt -of csv=p=0 "الملف.mp4"
+New-Item -ItemType Directory -Force h264 | Out-Null
+Get-ChildItem *.mp4 | ForEach-Object {
+  ffmpeg -y -loglevel error -i $_.FullName -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart "h264\$($_.Name)"
+  Write-Host "done: $($_.Name)"
+}
 ```
 
-المطلوب أن تكون النتيجة: `h264,yuv420p`
+أو عبر **HandBrake**: Preset `Fast 1080p30`، وفعّل **Web Optimized**، وتأكد أن `Video Encoder = H.264 (x264)`.
+
+## كيف تتأكد من ملف
+
+```powershell
+ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height -of csv=p=0 "الملف.mp4"
+```
+
+المطلوب: `h264,1920,1080`
 
 ---
 
-## ملاحظة للمستقبل
+## للتسجيلات القادمة
 
-عند تسجيل أي محاضرة جديدة، اضبط برنامج التسجيل (OBS أو Camtasia أو غيرها) على:
-
-- **Video encoder:** H.264 / x264
-- **Format:** MP4
-- **Audio:** AAC
-
-بهذا لن تحتاج خطوة تحويل أصلاً.
+اضبط OBS أو Camtasia على: **H.264 · MP4 · AAC** وفعّل خيار **Fast Start / Web Optimized** إن وُجد — فلا تحتاج أي خطوة تحويل.

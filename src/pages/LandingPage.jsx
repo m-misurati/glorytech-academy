@@ -72,16 +72,17 @@ export default function LandingPage() {
         <Hero />
 
         <section id="courses" className="py-20 lg:py-28">
-          <div className="mx-auto max-w-7xl px-5 lg:px-8">
+          {/* Heading, search and cards share one width so their edges line up. */}
+          <div className="mx-auto max-w-5xl px-5 lg:px-0">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <SectionHeading tag={t('courses.tag')} title={t('courses.title')} subtitle={t('courses.subtitle')} />
-              <label className="field w-full max-w-md rounded-full px-5">
+              <label className="field w-full rounded-full px-5 lg:max-w-sm">
                 <Search className="h-5 w-5 text-brand" />
                 <input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder={t('courses.searchPlaceholder')} aria-label={t('courses.searchLabel')} />
               </label>
             </div>
 
-            <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2">
               {filteredCourses.map((course) => <CourseCard key={course.id} course={course} />)}
             </div>
             {filteredCourses.length === 0 && <div className="mt-12 rounded-3xl border border-dashed border-line p-12 text-center font-bold text-muted">{t('courses.empty')}</div>}

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, ChevronDown, GraduationCap, Languages, LayoutDashboard, LogOut, Menu, Moon, ShieldCheck, Sun, UserRound, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,12 +10,11 @@ const sections = [
   { key: 'home', hash: '#home' },
   { key: 'courses', hash: '#courses' },
   { key: 'upcoming', hash: '#upcoming' },
-  { key: 'b2b', hash: '#b2b' },
   { key: 'instructors', hash: '#instructors' },
   { key: 'contact', hash: '#contact' },
 ];
 
-const pageLinks = [{ key: 'teach', to: '/teach' }];
+const pageLinks = [{ key: 'b2b', to: '/b2b' }, { key: 'teach', to: '/teach' }];
 
 const iconButton = 'grid h-10 w-10 place-items-center rounded-xl text-muted transition hover:bg-subtle hover:text-ink';
 
@@ -154,9 +152,14 @@ export default function SiteHeader({ compact = false }) {
         </button>
       </nav>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className={`overflow-hidden border-t border-line bg-canvas ${menuBreakpoint}`}>
+      {/* CSS-only expand: the grid row animates from 0fr to 1fr, no animation library needed. */}
+      <div
+        className={`grid overflow-hidden border-t bg-canvas transition-[grid-template-rows,opacity] duration-300 ${menuBreakpoint} ${
+          mobileOpen ? 'grid-rows-[1fr] border-line opacity-100' : 'grid-rows-[0fr] border-transparent opacity-0'
+        }`}
+        aria-hidden={!mobileOpen}
+      >
+        <div className="min-h-0 overflow-hidden">
             <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 sm:px-5">
               {sections.map((section) => (
                 <Link key={section.key} to={{ pathname: '/', hash: section.hash }} onClick={() => setMobileOpen(false)} className="rounded-xl px-4 py-3 font-bold text-ink hover:bg-subtle">
@@ -186,9 +189,8 @@ export default function SiteHeader({ compact = false }) {
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      </div>
     </header>
   );
 }

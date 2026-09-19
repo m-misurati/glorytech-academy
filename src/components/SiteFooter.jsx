@@ -5,7 +5,7 @@ import { useI18n } from '../i18n/I18nContext';
 import Brand from './Brand';
 import { TelegramIcon } from './icons';
 
-const quickLinks = ['courses', 'upcoming', 'b2b', 'instructors'];
+const quickLinks = ['courses', 'upcoming', 'instructors'];
 
 export default function SiteFooter() {
   const { t } = useI18n();

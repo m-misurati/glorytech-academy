@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, BookOpen, Check, Clock3, LockKeyhole, Mail, PlayCircle, Signal } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, Clock3, Mail, PlayCircle, Signal } from 'lucide-react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import CourseBadge from '../components/CourseBadge';
-import LessonResources from '../components/LessonResources';
 import SiteFooter from '../components/SiteFooter';
 import SiteHeader from '../components/SiteHeader';
 import { site } from '../config/site';
@@ -11,7 +10,7 @@ import { useCatalog } from '../context/CatalogContext';
 import { getAllLessons, getFirstLesson } from '../data/courses';
 import { useI18n } from '../i18n/I18nContext';
 import { usePageMeta } from '../lib/meta';
-import { enrollInCourse, getLessonResources, getUserProgress } from '../lib/supabase';
+import { enrollInCourse, getUserProgress } from '../lib/supabase';
 
 export default function CoursePage() {
   const { slug } = useParams();
@@ -22,7 +21,6 @@ export default function CoursePage() {
   const [busy, setBusy] = useState(false);
   const [enrollError, setEnrollError] = useState('');
   const [completedIds, setCompletedIds] = useState(new Set());
-  const [resources, setResources] = useState([]);
   const course = getCourseBySlug(slug);
   const lessonList = useMemo(() => getAllLessons(course), [course]);
   usePageMeta({ title: course ? pick(course, 'title') : undefined, description: course ? pick(course, 'description') : undefined });
@@ -35,35 +33,24 @@ export default function CoursePage() {
     return () => { active = false; };
   }, [user?.id]);
 
-  useEffect(() => {
-    let active = true;
-    const ids = lessonList.map((item) => item.id);
-    setResources([]);
-    if (!ids.length) return undefined;
-    getLessonResources(ids).then(({ data }) => { if (active && data) setResources(data); });
-    return () => { active = false; };
-  }, [lessonList, user?.id]);
-
   if (!course) return <Navigate to="/404" replace />;
   if (course.availability === 'coming_soon') return <Navigate to={{ pathname: '/', hash: '#upcoming' }} replace />;
 
   const instructor = getInstructor(course.instructorId);
   const lessons = lessonList;
-  const doneHere = lessons.filter((item) => completedIds.has(item.id)).length;
-  const coursePercent = lessons.length ? Math.round((doneHere / lessons.length) * 100) : 0;
   const nextLesson = lessons.find((item) => !completedIds.has(item.id)) || lessons[0];
-  const lessonTitles = Object.fromEntries(lessons.map((item) => [item.id, pick(item, 'title')]));
   const title = pick(course, 'title');
   const duration = formatMinutes(course.durationMinutes);
 
-  const startCourse = async () => {
-    if (!user) {
-      navigate('/login?mode=signup', { state: { from: `/courses/${course.slug}` } });
+  // Enrolls if needed, then opens the chosen lesson inside the course player.
+  const openLesson = async (targetLessonId) => {
+    const target = targetLessonId || getFirstLesson(course)?.id;
+    if (!target) {
+      setEnrollError(t('course.notReady'));
       return;
     }
-    const firstLesson = getFirstLesson(course);
-    if (!firstLesson) {
-      setEnrollError(t('course.notReady'));
+    if (!user) {
+      navigate('/login?mode=signup', { state: { from: `/learn/${course.slug}/${target}` } });
       return;
     }
     setBusy(true);
@@ -74,8 +61,10 @@ export default function CoursePage() {
       setEnrollError(t('course.enrollError'));
       return;
     }
-    navigate(`/learn/${course.slug}/${firstLesson.id}`);
+    navigate(`/learn/${course.slug}/${target}`);
   };
+
+  const startCourse = () => openLesson(nextLesson?.id);
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
@@ -112,23 +101,6 @@ export default function CoursePage() {
               )}
               {enrollError && <p className="mt-4 text-sm font-bold text-red-600 dark:text-red-400" role="alert">{enrollError}</p>}
 
-              {user && doneHere > 0 && (
-                <div className="mt-8 max-w-xl rounded-2xl border border-line bg-surface p-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <strong className="text-sm font-black">{t('course.progressTitle')}</strong>
-                    <span className="font-inter text-sm font-black text-brand-ink">{coursePercent}%</span>
-                  </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-subtle">
-                    <div className="h-full rounded-full bg-brand" style={{ width: `${coursePercent}%` }} />
-                  </div>
-                  <p className="mt-3 text-xs font-bold text-muted">{t('course.progressDone', { done: doneHere, total: lessons.length })}</p>
-                  {nextLesson && (
-                    <Link to={`/learn/${course.slug}/${nextLesson.id}`} className="btn-secondary mt-4 px-5 py-2.5 text-sm">
-                      {t('course.continueLesson')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
-                    </Link>
-                  )}
-                </div>
-              )}
             </div>
 
             <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 shadow-2xl">
@@ -149,19 +121,24 @@ export default function CoursePage() {
           <div>
             <span className="section-tag">{t('course.contentTag')}</span>
             <h2 className="mt-4 text-3xl font-black">{t('course.contentTitle', { count: lessons.length })}</h2>
+            {/* The course is free, so every lesson opens straight from here. */}
             <ol className="mt-7 overflow-hidden rounded-2xl border border-line bg-surface">
               {lessons.map((lesson, index) => {
                 const clock = formatClock(lesson.durationSeconds);
                 return (
-                  <li key={lesson.id} className="flex items-center gap-4 border-b border-line px-4 py-3.5 last:border-0 sm:px-5">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-subtle font-inter text-xs font-black text-muted">{index + 1}</span>
-                    <span dir="ltr" className="min-w-0 flex-1 text-start font-inter text-sm font-bold text-ink rtl:text-right">{pick(lesson, 'title')}</span>
-                    <span className="flex shrink-0 items-center gap-2 text-xs font-bold text-muted">
-                      {clock && <span className="font-inter tabular-nums">{clock}</span>}
-                      {lesson.isPreview
-                        ? <PlayCircle className="h-4 w-4 text-brand" aria-label={t('course.previewLesson')} />
-                        : <LockKeyhole className="h-4 w-4" aria-label={t('course.lockedLesson')} />}
-                    </span>
+                  <li key={lesson.id} className="border-b border-line last:border-0">
+                    <button
+                      type="button"
+                      onClick={() => openLesson(lesson.id)}
+                      className="group flex w-full items-center gap-4 px-4 py-3.5 text-start transition hover:bg-subtle sm:px-5"
+                    >
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-subtle font-inter text-xs font-black text-muted transition group-hover:bg-glory-600 group-hover:text-white">{index + 1}</span>
+                      <span dir="ltr" className="min-w-0 flex-1 text-start font-inter text-sm font-bold text-ink rtl:text-right">{pick(lesson, 'title')}</span>
+                      <span className="flex shrink-0 items-center gap-2 text-xs font-bold text-muted">
+                        {clock && <span className="font-inter tabular-nums">{clock}</span>}
+                        <PlayCircle className="h-5 w-5 text-brand" aria-hidden="true" />
+                      </span>
+                    </button>
                   </li>
                 );
               })}
@@ -169,9 +146,6 @@ export default function CoursePage() {
           </div>
 
           <aside className="space-y-6">
-            {resources.length > 0 && (
-              <LessonResources resources={resources} title={t('course.resourcesTitle')} emptyText={t('course.resourcesText')} lessonTitles={lessonTitles} />
-            )}
             <div className="rounded-[2rem] border border-line bg-[#0f1a15] p-7 text-white">
               <h2 className="text-2xl font-black">{t('course.outcomesTitle')}</h2>
               <ul className="mt-6 space-y-4">

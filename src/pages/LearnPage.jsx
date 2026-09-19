@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Check, CheckCircle2, Circle, ListVideo, Menu, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Menu, X } from 'lucide-react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import CourseBadge from '../components/CourseBadge';
 import LessonPlayer from '../components/LessonPlayer';
@@ -10,7 +10,7 @@ import { useCatalog } from '../context/CatalogContext';
 import { getAllLessons } from '../data/courses';
 import { useI18n } from '../i18n/I18nContext';
 import { usePageMeta } from '../lib/meta';
-import { getLessonResources, getUserProgress, saveLessonPosition, saveLessonProgress } from '../lib/supabase';
+import { enrollInCourse, getLessonResources, getUserProgress, saveLessonPosition, saveLessonProgress } from '../lib/supabase';
 
 export default function LearnPage() {
   const { slug, lessonId } = useParams();
@@ -46,6 +46,20 @@ export default function LearnPage() {
   }, [user?.id]);
 
   useEffect(() => { setProgressError(''); }, [lessonId]);
+
+  // Opening any lesson of a free course enrolls the learner first, so a lesson
+  // reached straight from the course page (or right after sign-up) can play.
+  const [enrolled, setEnrolled] = useState(false);
+  useEffect(() => {
+    let active = true;
+    if (!course?.isFree || !user?.id) {
+      setEnrolled(true);
+      return undefined;
+    }
+    setEnrolled(false);
+    enrollInCourse(user.id, course.id).finally(() => { if (active) setEnrolled(true); });
+    return () => { active = false; };
+  }, [course?.id, course?.isFree, user?.id]);
 
   useEffect(() => {
     let active = true;
@@ -98,19 +112,17 @@ export default function LearnPage() {
           <ol className="p-3">
             {lessons.map((item, index) => {
               const active = item.id === lesson.id;
-              const done = completed.has(item.id);
               const itemClock = formatClock(item.durationSeconds);
               return (
                 <li key={item.id}>
                   <button type="button" onClick={() => { navigate(`/learn/${course.slug}/${item.id}`); setSidebarOpen(false); }} aria-current={active ? 'true' : undefined} className={`${active ? 'bg-brand-soft ring-1 ring-glory-500/40' : 'hover:bg-subtle'} mb-1 flex w-full items-center gap-3 rounded-xl p-3 text-start transition`}>
-                    <span className={`${done ? 'bg-glory-600 text-white' : active ? 'bg-surface text-brand-ink' : 'bg-subtle text-muted'} grid h-8 w-8 shrink-0 place-items-center rounded-lg font-inter text-xs font-black`}>
-                      {done ? <Check className="h-4 w-4" /> : index + 1}
+                    <span className={`${active ? 'bg-glory-600 text-white' : 'bg-subtle text-muted'} grid h-8 w-8 shrink-0 place-items-center rounded-lg font-inter text-xs font-black`}>
+                      {index + 1}
                     </span>
                     <span className="min-w-0 flex-1">
                       <strong dir="ltr" className={`${active ? 'text-ink' : 'text-ink/80'} block truncate text-start font-inter text-sm rtl:text-right`}>{pick(item, 'title')}</strong>
                       {itemClock && <small className="mt-0.5 block font-inter text-xs text-muted">{itemClock}</small>}
                     </span>
-                    {!done && active && <Circle className="h-3 w-3 shrink-0 fill-current text-brand" />}
                   </button>
                 </li>
               );
@@ -122,12 +134,16 @@ export default function LearnPage() {
 
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-7 lg:px-10 lg:py-9">
           <button type="button" onClick={() => setSidebarOpen(true)} className="btn-secondary mb-5 px-4 py-2 text-sm lg:hidden"><Menu className="h-5 w-5" /> {t('learn.lessonsList')}</button>
-          <LessonPlayer
-            lesson={lesson}
-            course={course}
-            startAt={positions[lesson.id] || 0}
-            onProgress={(seconds) => saveLessonPosition(user?.id, lesson.id, seconds)}
-          />
+          {enrolled ? (
+            <LessonPlayer
+              lesson={lesson}
+              course={course}
+              startAt={positions[lesson.id] || 0}
+              onProgress={(seconds) => saveLessonPosition(user?.id, lesson.id, seconds)}
+            />
+          ) : (
+            <div className="aspect-video animate-pulse rounded-[1.75rem] bg-slate-900" aria-busy="true" />
+          )}
 
           <div className="mx-auto max-w-5xl py-7">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
@@ -148,10 +164,6 @@ export default function LearnPage() {
             {progressError && <p className="mt-7 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-700 dark:text-red-300" role="alert">{progressError}</p>}
             <div className="mt-8">
               <LessonResources resources={resources} title={t('learn.resources')} emptyText={t('learn.noResources')} />
-            </div>
-            <div className="card mt-6 p-6">
-              <div className="flex items-center gap-3"><ListVideo className="h-6 w-6 text-brand" /><h2 className="font-black">{t('learn.aboutTitle')}</h2></div>
-              <p className="mt-4 text-sm font-medium leading-8 text-muted">{t('learn.aboutText')}</p>
             </div>
           </div>
         </main>

@@ -6,7 +6,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 const PASSTHROUGH_HEADERS = ['Content-Length', 'Content-Range', 'Accept-Ranges', 'Last-Modified', 'ETag']
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url)
 
     const playbackMatch = pathname.match(/^\/api\/lessons\/([^/]+)\/playback$/)
@@ -18,7 +18,7 @@ export default {
     const streamMatch = pathname.match(/^\/api\/stream\/([^/]+)$/)
     if (streamMatch) {
       if (request.method !== 'GET' && request.method !== 'HEAD') return new Response(null, { status: 405 })
-      return handleStream(request, env, streamMatch[1])
+      return handleStream(request, env, ctx, streamMatch[1])
     }
 
     if (pathname.startsWith('/api/')) return json({ error: 'not_found' }, 404)
@@ -66,7 +66,7 @@ async function handlePlayback(request, env, lessonId) {
 }
 
 // Proxies the video bytes (including Range requests) so the browser never sees the Drive origin.
-async function handleStream(request, env, token) {
+async function handleStream(request, env, ctx, token) {
   if (!env.STREAM_SIGNING_SECRET) return new Response(null, { status: 500 })
 
   const payload = await verifyToken(token, env.STREAM_SIGNING_SECRET)
@@ -75,31 +75,160 @@ async function handleStream(request, env, token) {
   const media = await lookupMedia(env, payload.l)
   if (!media) return new Response(null, { status: 404 })
 
-  const upstreamHeaders = new Headers()
-  const range = request.headers.get('Range')
-  if (range) upstreamHeaders.set('Range', range)
+  const range = parseRange(request.headers.get('Range'))
 
-  const upstream = await fetch(driveDownloadUrl(media.driveFileId), {
-    method: request.method,
-    headers: upstreamHeaders,
-    redirect: 'follow',
-  })
-
-  // Drive answers with an HTML page for quota, permission, or scan-warning problems.
-  const upstreamType = upstream.headers.get('Content-Type') || ''
-  if (upstream.status === 416) return new Response(null, { status: 416, headers: pickHeaders(upstream.headers) })
-  if (!upstream.ok || upstreamType.startsWith('text/html')) {
-    console.error('Drive upstream failed', upstream.status, upstreamType, payload.l)
-    return new Response(null, { status: 502 })
+  // Without a Range header the browser wants the whole file; stream it straight through.
+  // Chrome only does this for the very first probe, then switches to ranges.
+  if (!range) {
+    const upstream = await fetchDrive(media.driveFileId)
+    const failure = driveFailure(upstream, payload.l)
+    if (failure) return failure
+    const headers = streamHeaders(pickHeaders(upstream.headers), media, upstream)
+    return new Response(request.method === 'HEAD' ? null : upstream.body, { status: upstream.status, headers })
   }
 
-  const headers = pickHeaders(upstream.headers)
-  headers.set('Content-Type', media.mimeType || upstreamType)
-  headers.set('Content-Disposition', 'inline')
-  headers.set('Cache-Control', 'private, no-store')
-  headers.set('X-Content-Type-Options', 'nosniff')
+  // Drive throttles to a few hundred KB/s, so every byte we serve twice must come
+  // from the edge instead. Ranges are snapped to fixed chunks and each chunk is
+  // cached once; the next learner on the same lesson is served from Cloudflare.
+  const chunkIndex = Math.floor(range.start / CHUNK_SIZE)
+  const chunkStart = chunkIndex * CHUNK_SIZE
+  const cacheKey = new Request(`https://media.cache.invalid/${media.driveFileId}/${chunkIndex}`)
 
-  return new Response(request.method === 'HEAD' ? null : upstream.body, { status: upstream.status, headers })
+  const hit = await caches.default.match(cacheKey)
+  if (hit) {
+    const buffer = await hit.arrayBuffer()
+    const total = Number(hit.headers.get('X-Total-Length')) || 0
+    if (total && range.start >= total) {
+      return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${total}` } })
+    }
+    const chunkEnd = chunkStart + buffer.byteLength - 1
+    const end = Math.min(range.end ?? chunkEnd, chunkEnd)
+    const body = buffer.slice(range.start - chunkStart, end - chunkStart + 1)
+    return partialResponse(request, media, body, range.start, end, total)
+  }
+
+  // Cache miss: never make the learner wait for a whole chunk. Stream their bytes
+  // straight from Drive, and fill the cache for the next learner in the background.
+  const chunkLast = chunkStart + CHUNK_SIZE - 1
+  const aligned = range.start === chunkStart
+  const upstream = await fetchDrive(media.driveFileId, `bytes=${aligned ? chunkStart : range.start}-${chunkLast}`)
+  const failure = driveFailure(upstream, payload.l)
+  if (failure) return failure
+
+  const upstreamRange = parseContentRange(upstream.headers.get('Content-Range'))
+  const total = upstreamRange?.total || 0
+  const upstreamEnd = upstreamRange?.end ?? chunkLast
+  const end = Math.min(range.end ?? upstreamEnd, upstreamEnd)
+
+  let clientBody = upstream.body
+  if (aligned) {
+    // One Drive read serves both: the learner's copy and the cached copy.
+    const [toClient, toCache] = upstream.body.tee()
+    clientBody = toClient
+    ctx.waitUntil(storeChunk(cacheKey, toCache, total))
+  } else {
+    ctx.waitUntil(fillChunk(cacheKey, media.driveFileId, chunkStart, chunkLast))
+  }
+
+  const length = end - range.start + 1
+  return partialResponse(request, media, limitStream(clientBody, length), range.start, end, total, length)
+}
+
+// 4 MB keeps a cold seek short (few seconds from Drive) while a lesson still
+// needs only a few dozen cached objects.
+const CHUNK_SIZE = 4 * 1024 * 1024
+
+function partialResponse(request, media, body, start, end, total, length) {
+  const headers = new Headers()
+  headers.set('Content-Type', media.mimeType || 'video/mp4')
+  headers.set('Content-Length', String(length ?? body.byteLength))
+  headers.set('Content-Range', `bytes ${start}-${end}/${total || '*'}`)
+  headers.set('Accept-Ranges', 'bytes')
+  headers.set('Content-Disposition', 'inline')
+  // Signed per learner, so the browser may keep it but shared caches may not.
+  headers.set('Cache-Control', 'private, max-age=3600')
+  headers.set('X-Content-Type-Options', 'nosniff')
+  return new Response(request.method === 'HEAD' ? null : body, { status: 206, headers })
+}
+
+function parseContentRange(value) {
+  const match = /bytes (\d+)-(\d+)\/(\d+|\*)/.exec(value || '')
+  if (!match) return null
+  return { start: Number(match[1]), end: Number(match[2]), total: match[3] === '*' ? 0 : Number(match[3]) }
+}
+
+// Passes through at most `length` bytes, so the body always matches Content-Length.
+function limitStream(stream, length) {
+  let remaining = length
+  return stream.pipeThrough(new TransformStream({
+    transform(chunk, controller) {
+      if (remaining <= 0) return
+      const piece = chunk.byteLength > remaining ? chunk.subarray(0, remaining) : chunk
+      remaining -= piece.byteLength
+      controller.enqueue(piece)
+    },
+  }))
+}
+
+async function storeChunk(cacheKey, body, total) {
+  try {
+    const buffer = await new Response(body).arrayBuffer()
+    // Stored as a plain 200: the Cache API refuses to store 206 responses.
+    await caches.default.put(cacheKey, new Response(buffer, {
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': String(buffer.byteLength),
+        'X-Total-Length': String(total),
+        'Cache-Control': `public, max-age=${CHUNK_CACHE_SECONDS}`,
+      },
+    }))
+  } catch (error) {
+    console.error('Chunk cache store failed', error.message)
+  }
+}
+
+async function fillChunk(cacheKey, fileId, start, last) {
+  const upstream = await fetchDrive(fileId, `bytes=${start}-${last}`)
+  const type = upstream.headers.get('Content-Type') || ''
+  if (!upstream.ok || type.startsWith('text/html')) return
+  const total = parseContentRange(upstream.headers.get('Content-Range'))?.total || 0
+  await storeChunk(cacheKey, upstream.body, total)
+}
+
+function parseRange(value) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec((value || '').trim())
+  if (!match) return null
+  const [, rawStart, rawEnd] = match
+  if (!rawStart) return null // suffix ranges ("bytes=-500") fall back to the passthrough path
+  return { start: Number(rawStart), end: rawEnd ? Number(rawEnd) : null }
+}
+
+const CHUNK_CACHE_SECONDS = 7 * 24 * 60 * 60
+
+function fetchDrive(fileId, range) {
+  const headers = new Headers()
+  if (range) headers.set('Range', range)
+  return fetch(driveDownloadUrl(fileId), { headers, redirect: 'follow' })
+}
+
+// Drive answers with an HTML page for quota, permission, or scan-warning problems.
+function driveFailure(upstream, lessonId) {
+  const type = upstream.headers.get('Content-Type') || ''
+  if (upstream.status === 416) return new Response(null, { status: 416, headers: pickHeaders(upstream.headers) })
+  if (!upstream.ok || type.startsWith('text/html')) {
+    console.error('Drive upstream failed', upstream.status, type, lessonId)
+    return new Response(null, { status: 502 })
+  }
+  return null
+}
+
+function streamHeaders(headers, media, upstream) {
+  headers.set('Content-Type', media.mimeType || upstream.headers.get('Content-Type') || 'video/mp4')
+  headers.set('Content-Disposition', 'inline')
+  headers.set('Accept-Ranges', 'bytes')
+  headers.set('Cache-Control', 'private, max-age=3600')
+  headers.set('X-Content-Type-Options', 'nosniff')
+  return headers
 }
 
 // Lesson videos live in the database (set from the instructor portal); worker/media.js is the fallback.
