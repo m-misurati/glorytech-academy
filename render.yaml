@@ -1,0 +1,23 @@
+# Render blueprint. Create the service from this file: Render → New → Blueprint.
+# Video is served by the Cloudflare Worker (API_BASE), not by this container.
+services:
+  - type: web
+    name: glorytech-academy
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: VITE_SITE_URL
+        value: https://academy.glorytech.ly
+      - key: SUPABASE_URL
+        value: https://icmzrmzwomnnjojzaafq.supabase.co
+      - key: SUPABASE_PUBLISHABLE_KEY
+        value: sb_publishable_xYS9uFaMfZjjF7kZFgXEIQ_N1IYBggy
+      - key: CONTACT_EMAIL
+        value: info@glorytech.ly
+      # Set this in the dashboard after `wrangler deploy` prints the Worker URL.
+      - key: API_BASE
+        sync: false

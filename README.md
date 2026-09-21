@@ -52,6 +52,7 @@ The landing page markets sixteen upcoming tracks from `src/data/upcoming.js` (CC
 - Supabase JS
 - PostgreSQL with Row-Level Security
 - Cloudflare Worker-compatible production build
+- Docker image (multi-stage) with runtime configuration injection
 
 ## Application Routes
 
@@ -287,6 +288,7 @@ supabase stop
 | --- | --- |
 | `docs/DEPLOY.md` | Deploying the Worker and the frontend to Cloudflare |
 | `docs/DEPLOY-LIBYANSPIDER.md` | Deploying onto LibyanSpider cPanel hosting, with the required `.htaccess` |
+| `docs/DEPLOY-DOCKER.md` | Container image, local run, and Render free-tier deployment |
 | `docs/CONVERT-VIDEOS.md` | Video encoding requirements (H.264 + faststart) and how to convert |
 | `docs/ROADMAP.md` | Planned features beyond the current release |
 

@@ -10,7 +10,8 @@
     "prebuild": "node scripts/generate-seo.mjs",
     "test:db": "node scripts/db-test.mjs",
     "test:db:schema": "node scripts/db-test.mjs schema",
-    "package:cpanel": "node scripts/package-cpanel.mjs"
+    "package:cpanel": "node scripts/package-cpanel.mjs",
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.4",

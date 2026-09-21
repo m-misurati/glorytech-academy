@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.github
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.example
+.wrangler
+glorytech-site.zip
+docs
+scratchpad
+*.log
+*.md
+!README.md

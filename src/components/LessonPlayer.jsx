@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Loader2, Lock, Radio, ShieldCheck, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { config } from '../lib/config';
 import { useI18n } from '../i18n/I18nContext';
 import { requestLessonPlayback } from '../lib/supabase';
 import VideoPlayer from './VideoPlayer';
@@ -26,7 +27,7 @@ export default function LessonPlayer({ lesson, course, startAt = 0, onProgress }
   const { user, isDemo } = useAuth();
   const { t, pick } = useI18n();
   const [playback, setPlayback] = useState({ status: 'loading' });
-  const channel = import.meta.env.VITE_TELEGRAM_CHANNEL;
+  const channel = config.telegramChannel;
   const messageId = lesson?.telegramMessageId;
   const title = pick(lesson, 'title');
 

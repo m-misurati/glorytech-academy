@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
+import { config } from './config';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl = config.supabaseUrl;
+const supabasePublishableKey = config.supabasePublishableKey;
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabasePublishableKey);
 
@@ -55,9 +56,9 @@ export async function getUserProgress(userId) {
 }
 
 // Where the Worker lives. Empty when the Worker also serves the site (Cloudflare);
-// set to e.g. https://glorytech-academy.<account>.workers.dev when the site is on
-// other hosting such as cPanel.
-const API_BASE = (import.meta.env.VITE_API_BASE || '').trim().replace(/\/+$/, '');
+// set to e.g. https://glorytech-academy.<account>.workers.dev when the site is
+// hosted elsewhere (Render container, cPanel).
+const API_BASE = config.apiBase;
 
 // Asks the Worker for a short-lived stream URL. status: ready | no_media | not_found | not_enrolled | unauthorized | error
 export async function requestLessonPlayback(lessonId) {
