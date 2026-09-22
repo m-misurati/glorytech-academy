@@ -16,7 +16,7 @@ export default function LearnPage() {
   const { slug, lessonId } = useParams();
   const { getCourseBySlug } = useCatalog();
   const { t, pick, formatClock } = useI18n();
-  const { user, isDemo, loading: authLoading } = useAuth();
+  const { user, isDemo } = useAuth();
   const navigate = useNavigate();
   const [completed, setCompleted] = useState(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -67,15 +67,6 @@ export default function LearnPage() {
   }, [lessonId, user?.id]);
 
   if (!course || course.availability === 'coming_soon' || !lesson) return <Navigate to="/404" replace />;
-
-  // Wait for the session to resolve, otherwise a signed-in learner is bounced on reload.
-  if (authLoading) return <div className="min-h-screen bg-canvas" aria-busy="true" />;
-
-  // The route is public so the free first lesson can be watched without an account.
-  // Any other lesson sends the visitor to sign up and returns them here afterwards.
-  if (!user && !isDemo && !lesson.isPreview) {
-    return <Navigate to="/login?mode=signup" replace state={{ from: `/learn/${course.slug}/${lesson.id}` }} />;
-  }
 
   const markComplete = async () => {
     setSaving(true);
@@ -154,20 +145,13 @@ export default function LearnPage() {
                 <h1 dir="ltr" className="mt-2 text-start font-inter text-2xl font-black sm:text-3xl rtl:text-right">{pick(lesson, 'title')}</h1>
                 {clock && <p className="mt-3 text-sm font-medium text-muted">{t('learn.duration', { value: clock })}</p>}
               </div>
-              {/* A visitor watching the free lesson has no progress to save; invite them in instead. */}
-              {user || isDemo ? (
-                <button type="button" disabled={saving || isDone} onClick={markComplete} className={`btn-primary shrink-0 ${isDone ? '!bg-brand-soft !text-brand-ink disabled:opacity-100' : ''}`}>
-                  {isDone
-                    ? <><CheckCircle2 className="h-5 w-5" /> {t('learn.completed')}</>
-                    : saving
-                      ? t('common.saving')
-                      : <>{nextLesson ? t('learn.completeNext') : t('learn.completeCourse')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" /></>}
-                </button>
-              ) : (
-                <Link to="/login?mode=signup" state={{ from: `/courses/${course.slug}` }} className="btn-primary shrink-0">
-                  {t('learn.signUpToContinue')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" />
-                </Link>
-              )}
+              <button type="button" disabled={saving || isDone} onClick={markComplete} className={`btn-primary shrink-0 ${isDone ? '!bg-brand-soft !text-brand-ink disabled:opacity-100' : ''}`}>
+                {isDone
+                  ? <><CheckCircle2 className="h-5 w-5" /> {t('learn.completed')}</>
+                  : saving
+                    ? t('common.saving')
+                    : <>{nextLesson ? t('learn.completeNext') : t('learn.completeCourse')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" /></>}
+              </button>
             </div>
             {isDemo && <p className="mt-7 rounded-xl border border-glory-500/30 bg-brand-soft px-4 py-3 text-xs font-bold text-brand-ink">{t('learn.demoNote')}</p>}
             {progressError && <p className="mt-7 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-700 dark:text-red-300" role="alert">{progressError}</p>}

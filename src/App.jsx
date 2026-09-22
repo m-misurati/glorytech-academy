@@ -64,9 +64,7 @@ export default function App() {
               <Route path="/teach" element={<TeachPage />} />
               <Route path="/b2b" element={<B2BPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              {/* Not wrapped: the first lesson of a course is open to visitors; LearnPage sends
-                  anyone without a session to sign-up for the lessons that follow. */}
-              <Route path="/learn/:slug/:lessonId" element={<LearnPage />} />
+              <Route path="/learn/:slug/:lessonId" element={<ProtectedRoute><LearnPage /></ProtectedRoute>} />
               <Route path="/instructor" element={<ProtectedRoute role="instructor"><TeachingDashboardPage /></ProtectedRoute>} />
               <Route path="/instructor/courses/:courseId" element={<ProtectedRoute role="instructor"><CourseEditorPage /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute>} />
