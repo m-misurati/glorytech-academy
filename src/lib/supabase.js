@@ -64,14 +64,15 @@ const API_BASE = config.apiBase;
 export async function requestLessonPlayback(lessonId) {
   if (!supabase) return { status: 'unauthorized' };
 
+  // Visitors with no session are allowed through: the Worker answers for preview
+  // lessons and refuses the rest, so the rule lives in one place.
   const { data } = await supabase.auth.getSession();
   const accessToken = data.session?.access_token;
-  if (!accessToken) return { status: 'unauthorized' };
 
   try {
     const response = await fetch(`${API_BASE}/api/lessons/${encodeURIComponent(lessonId)}/playback`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
     });
     const body = await response.json().catch(() => ({}));
     // The Worker answers with a path; it must point back at the Worker, not at the site.

@@ -48,22 +48,27 @@ async function handlePlayback(request, env, lessonId) {
   }
   if (!UUID_PATTERN.test(lessonId)) return json({ error: 'not_found' }, 404)
 
+  // A visitor with no session may still watch a preview lesson, so a missing token
+  // is not refused here; it only limits which lessons are allowed below.
   const accessToken = request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1]
-  if (!accessToken) return json({ error: 'unauthorized' }, 401)
+  let userId = null
+  if (accessToken) {
+    const userResponse = await supabaseFetch(env, '/auth/v1/user', accessToken)
+    if (!userResponse.ok) return json({ error: 'unauthorized' }, 401)
+    userId = (await userResponse.json()).id
+  }
 
-  const userResponse = await supabaseFetch(env, '/auth/v1/user', accessToken)
-  if (!userResponse.ok) return json({ error: 'unauthorized' }, 401)
-  const user = await userResponse.json()
-
-  // Queries run with the learner's token, so RLS decides what is visible.
+  // Queries run with the caller's token (or the anon key), so RLS decides what is visible.
   const lessonResponse = await supabaseFetch(env, `/rest/v1/lessons?id=eq.${lessonId}&select=course_id,is_preview`, accessToken)
   const [lesson] = lessonResponse.ok ? await lessonResponse.json() : []
   if (!lesson) return json({ error: 'not_found' }, 404)
 
   if (!lesson.is_preview) {
+    // Everything past the free lesson still needs an account and an enrollment.
+    if (!userId) return json({ error: 'unauthorized' }, 401)
     const enrollmentResponse = await supabaseFetch(
       env,
-      `/rest/v1/enrollments?course_id=eq.${lesson.course_id}&user_id=eq.${user.id}&select=course_id`,
+      `/rest/v1/enrollments?course_id=eq.${lesson.course_id}&user_id=eq.${userId}&select=course_id`,
       accessToken,
     )
     const enrollments = enrollmentResponse.ok ? await enrollmentResponse.json() : []
@@ -74,7 +79,7 @@ async function handlePlayback(request, env, lessonId) {
   if (!media) return json({ error: 'no_media' }, 404)
 
   const expiresAt = Math.floor(Date.now() / 1000) + PLAYBACK_TTL_SECONDS
-  const token = await signToken({ l: lessonId, u: user.id, e: expiresAt }, env.STREAM_SIGNING_SECRET)
+  const token = await signToken({ l: lessonId, u: userId || 'anon', e: expiresAt }, env.STREAM_SIGNING_SECRET)
 
   return json({ url: `/api/stream/${token}`, expiresAt })
 }
@@ -297,11 +302,12 @@ function pickHeaders(source) {
   return headers
 }
 
+// Without a session the anon key is used, so RLS applies the visitor policies.
 function supabaseFetch(env, path, accessToken) {
   return fetch(`${env.SUPABASE_URL}${path}`, {
     headers: {
       apikey: env.SUPABASE_PUBLISHABLE_KEY,
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken || env.SUPABASE_PUBLISHABLE_KEY}`,
     },
   })
 }

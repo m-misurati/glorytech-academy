@@ -50,6 +50,11 @@ export default function CoursePage() {
       return;
     }
     if (!user) {
+      // The free first lesson opens straight away; the rest ask for an account first.
+      if (lessons.find((item) => item.id === target)?.isPreview) {
+        navigate(`/learn/${course.slug}/${target}`);
+        return;
+      }
       navigate('/login?mode=signup', { state: { from: `/learn/${course.slug}/${target}` } });
       return;
     }
