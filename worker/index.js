@@ -14,13 +14,25 @@ export default {
       // The site may be hosted elsewhere (cPanel), so the browser asks first.
       if (request.method === 'OPTIONS') return withCors(request, env, new Response(null, { status: 204 }))
       if (request.method !== 'POST') return withCors(request, env, json({ error: 'method_not_allowed' }, 405))
-      return withCors(request, env, await handlePlayback(request, env, playbackMatch[1]))
+      try {
+        return withCors(request, env, await handlePlayback(request, env, playbackMatch[1]))
+      } catch (error) {
+        // Supabase unreachable (slow or dropped link): a retryable answer, not a crash.
+        console.error('Playback lookup failed', error?.message)
+        return withCors(request, env, json({ error: 'upstream_unavailable' }, 503))
+      }
     }
 
     const streamMatch = pathname.match(/^\/api\/stream\/([^/]+)$/)
     if (streamMatch) {
       if (request.method !== 'GET' && request.method !== 'HEAD') return new Response(null, { status: 405 })
-      return handleStream(request, env, ctx, streamMatch[1])
+      try {
+        return await handleStream(request, env, ctx, streamMatch[1])
+      } catch (error) {
+        // Drive dropped the connection before answering. The <video> element retries a 5xx range.
+        console.error('Stream upstream failed', error?.message)
+        return new Response(null, { status: 502, headers: { 'Cache-Control': 'no-store' } })
+      }
     }
 
     if (pathname.startsWith('/api/')) return json({ error: 'not_found' }, 404)
@@ -189,12 +201,18 @@ async function storeChunk(cacheKey, body, total) {
   }
 }
 
+// Runs inside waitUntil, after the learner already has their bytes, so it must
+// never reject: a failure here only means the chunk is fetched again next time.
 async function fillChunk(cacheKey, fileId, start, last) {
-  const upstream = await fetchDrive(fileId, `bytes=${start}-${last}`)
-  const type = upstream.headers.get('Content-Type') || ''
-  if (!upstream.ok || type.startsWith('text/html')) return
-  const total = parseContentRange(upstream.headers.get('Content-Range'))?.total || 0
-  await storeChunk(cacheKey, upstream.body, total)
+  try {
+    const upstream = await fetchDrive(fileId, `bytes=${start}-${last}`)
+    const type = upstream.headers.get('Content-Type') || ''
+    if (!upstream.ok || type.startsWith('text/html')) return
+    const total = parseContentRange(upstream.headers.get('Content-Range'))?.total || 0
+    await storeChunk(cacheKey, upstream.body, total)
+  } catch (error) {
+    console.error('Background chunk fill failed', error?.message)
+  }
 }
 
 function parseRange(value) {

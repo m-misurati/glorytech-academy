@@ -5,6 +5,7 @@ import SeekPreview from './SeekPreview';
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 const HIDE_CONTROLS_AFTER_MS = 2500;
+const MAX_AUTO_RETRIES = 3;
 
 function formatTime(value) {
   if (!Number.isFinite(value) || value < 0) return '0:00';
@@ -23,6 +24,8 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
   const resumeAt = useRef(startAt || 0);
   const lastReported = useRef(0);
   const codecChecked = useRef(false);
+  const autoRetries = useRef(0);
+  const retryTimer = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [waiting, setWaiting] = useState(true);
   const [hover, setHover] = useState(null);
@@ -54,7 +57,10 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  useEffect(() => () => clearTimeout(hideTimer.current), []);
+  useEffect(() => () => {
+    clearTimeout(hideTimer.current);
+    clearTimeout(retryTimer.current);
+  }, []);
 
   const revealControls = useCallback(() => {
     setControlsVisible(true);
@@ -137,9 +143,24 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
 
   const handleError = () => {
     resumeAt.current = videoRef.current?.currentTime || resumeAt.current;
+    setPlaying(false);
+    // On a slow or flaky link the stream drops now and then. Fetch a fresh URL and
+    // resume at the same second, backing off 1s, 2s, 4s, before asking the learner.
+    if (onRetry && autoRetries.current < MAX_AUTO_RETRIES) {
+      const delay = 1000 * 2 ** autoRetries.current;
+      autoRetries.current += 1;
+      setWaiting(true);
+      clearTimeout(retryTimer.current);
+      retryTimer.current = setTimeout(onRetry, delay);
+      return;
+    }
     setFailed(true);
     setWaiting(false);
-    setPlaying(false);
+  };
+
+  const retryNow = () => {
+    autoRetries.current = 0;
+    onRetry?.();
   };
 
   const played = duration ? currentTime / duration : 0;
@@ -169,7 +190,7 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
         onPause={(event) => { setPlaying(false); setControlsVisible(true); onProgress?.(event.currentTarget.currentTime); }}
         onWaiting={() => setWaiting(true)}
         onCanPlay={() => setWaiting(false)}
-        onPlaying={() => setWaiting(false)}
+        onPlaying={() => { setWaiting(false); autoRetries.current = 0; }}
         onLoadedMetadata={(event) => {
           const video = event.currentTarget;
           setDuration(video.duration);
@@ -237,7 +258,7 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
             <p className="mt-4 font-black">{t('player.failTitle')}</p>
             <p className="mt-2 text-sm text-white/60">{t('player.failText')}</p>
             {onRetry && (
-              <button type="button" onClick={onRetry} className="mt-5 rounded-full bg-glory-600 px-6 py-2.5 text-sm font-black">{t('common.retry')}</button>
+              <button type="button" onClick={retryNow} className="mt-5 rounded-full bg-glory-600 px-6 py-2.5 text-sm font-black">{t('common.retry')}</button>
             )}
           </div>
         </div>
