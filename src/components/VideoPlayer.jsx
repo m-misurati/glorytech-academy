@@ -26,6 +26,7 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
   const codecChecked = useRef(false);
   const autoRetries = useRef(0);
   const retryTimer = useRef(null);
+  const resumePlaying = useRef(false);
   const [playing, setPlaying] = useState(false);
   const [waiting, setWaiting] = useState(true);
   const [hover, setHover] = useState(null);
@@ -143,6 +144,7 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
 
   const handleError = () => {
     resumeAt.current = videoRef.current?.currentTime || resumeAt.current;
+    resumePlaying.current = resumePlaying.current || playing;
     setPlaying(false);
     // On a slow or flaky link the stream drops now and then. Fetch a fresh URL and
     // resume at the same second, backing off 1s, 2s, 4s, before asking the learner.
@@ -199,6 +201,11 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
           if (resumeAt.current > 0) {
             video.currentTime = resumeAt.current;
             resumeAt.current = 0;
+          }
+          // Recovering from a dropped stream: carry on playing if the learner was watching.
+          if (resumePlaying.current) {
+            resumePlaying.current = false;
+            video.play().catch(() => {});
           }
         }}
         onTimeUpdate={(event) => {
