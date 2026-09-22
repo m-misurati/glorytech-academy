@@ -60,7 +60,7 @@ https://glorytech-academy.XXXX.workers.dev
 VITE_SUPABASE_URL=https://icmzrmzwomnnjojzaafq.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xYS9uFaMfZjjF7kZFgXEIQ_N1IYBggy
 VITE_SITE_URL=https://academy.glorytech.ly
-VITE_CONTACT_EMAIL=info@glorytech.ly
+VITE_CONTACT_EMAIL=info@academy.glorytech.ly
 VITE_API_BASE=https://glorytech-academy.XXXX.workers.dev
 ```
 
@@ -117,6 +117,6 @@ npm run package:cpanel
 
 ## ملاحظات
 
-- **البريد**: استضافة Godzilla تصلح لاستضافة `info@glorytech.ly` من cPanel ← Email Accounts.
+- **البريد**: استضافة Godzilla تصلح لاستضافة `info@academy.glorytech.ly` من cPanel ← Email Accounts.
 - **سرعة المقاطع**: الـ Worker يخزّن أجزاء الفيديو على شبكة Cloudflare، فتُفتح المحاضرة فوراً بعد أول مشاهدة. المشاهدة الأولى لكل محاضرة تبقى محكومة بسرعة Google Drive. الحل الجذري نقل المقاطع إلى **Cloudflare R2** (أول 10 جيجا مجاناً، ومقاطعك الحالية حوالي 8 جيجا).
 - **بديل أبسط مستقبلاً**: نقل الدومين كاملاً إلى Cloudflare DNS ونشر الموقع والـ Worker معاً بأمر `npx wrangler deploy` واحد، فتستغني عن الرفع اليدوي. تبقى استضافة Godzilla للبريد.

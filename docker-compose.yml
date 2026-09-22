@@ -15,6 +15,6 @@ services:
       SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:?set VITE_SUPABASE_PUBLISHABLE_KEY in .env}
       # Cloudflare Worker that serves lesson video.
       API_BASE: ${VITE_API_BASE:-}
-      CONTACT_EMAIL: ${VITE_CONTACT_EMAIL:-info@glorytech.ly}
+      CONTACT_EMAIL: ${VITE_CONTACT_EMAIL:-info@academy.glorytech.ly}
       TELEGRAM_CHANNEL: ${VITE_TELEGRAM_CHANNEL:-}
     restart: unless-stopped

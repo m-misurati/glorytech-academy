@@ -48,7 +48,7 @@
 | `SUPABASE_URL` | `https://icmzrmzwomnnjojzaafq.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` |
 | `API_BASE` | `https://glorytech-academy.XXXX.workers.dev` |
-| `CONTACT_EMAIL` | `info@glorytech.ly` |
+| `CONTACT_EMAIL` | `info@academy.glorytech.ly` |
 | `PORT` | يضبطه Render تلقائياً |
 
 يعني: **صورة واحدة** تصلح للتجربة والإنتاج، وتغيير أي قيمة = إعادة تشغيل بثوانٍ، لا إعادة بناء.
