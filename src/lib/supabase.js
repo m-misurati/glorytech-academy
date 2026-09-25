@@ -170,11 +170,16 @@ export async function getPublishedCatalog() {
 // Roles and dashboards (see supabase/migrations/20260917090000_*.sql)
 // ---------------------------------------------------------------------------
 
+// A single failed call used to hide the instructor and admin links until the page
+// was reloaded, so one dropped request is retried before giving up.
 export async function getMyRoles() {
   if (!supabase) return { isAdmin: false, instructor: null };
-  const { data, error } = await supabase.rpc('get_my_roles');
-  if (error || !data) return { isAdmin: false, instructor: null };
-  return { isAdmin: Boolean(data.is_admin), instructor: data.instructor || null };
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const { data, error } = await supabase.rpc('get_my_roles');
+    if (!error && data) return { isAdmin: Boolean(data.is_admin), instructor: data.instructor || null };
+    if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 800));
+  }
+  return { isAdmin: false, instructor: null };
 }
 
 export async function getDashboard(instructorId = null) {
