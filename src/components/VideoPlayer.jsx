@@ -142,47 +142,45 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
     setSpeedMenuOpen(false);
   };
 
-  const toggleFullscreen = (e) => {
-    e?.preventDefault?.();
-    e?.stopPropagation?.();
-
+  const toggleFullscreen = () => {
     const video = videoRef.current;
     const element = containerRef.current;
 
-    // 1. If currently in fullscreen, exit it:
-    if (document.fullscreenElement || document.webkitFullscreenElement) {
-      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      return;
-    }
+    // 1. If currently in iOS native fullscreen:
     if (video?.webkitDisplayingFullscreen) {
       try { video.webkitExitFullscreen?.(); } catch {}
       return;
     }
 
-    // 2. Detect iOS / iPhone directly
-    const isIOS = typeof navigator !== 'undefined' && (
+    // 2. If currently in standard HTML5 fullscreen:
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      return;
+    }
+
+    // 3. iPhone / iOS WebKit:
+    // Safari on iPhone only allows fullscreen via HTMLVideoElement.webkitEnterFullscreen()
+    // and ignores/refuses element.requestFullscreen().
+    // Calling video.webkitEnterFullscreen() must be direct and synchronous without preventDefault().
+    const isIOSDevice = typeof navigator !== 'undefined' && (
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
     );
 
-    // On iPhone, standard Element.requestFullscreen is not supported or rejected.
-    // video.webkitEnterFullscreen MUST be called synchronously inside the user gesture.
-    if (isIOS && video?.webkitEnterFullscreen) {
+    if (isIOSDevice && typeof video?.webkitEnterFullscreen === 'function') {
       try {
         video.webkitEnterFullscreen();
         return;
       } catch (err) {
-        console.warn('webkitEnterFullscreen failed:', err);
+        console.warn('iOS webkitEnterFullscreen failed:', err);
       }
     }
 
-    // 3. Standard Fullscreen API for Android, desktop Chrome, Firefox, Safari desktop
+    // 4. Standard Fullscreen API for Android, desktop Chrome/Edge/Firefox, macOS Safari
     if (element?.requestFullscreen) {
       element.requestFullscreen().catch(() => {
-        if (video?.webkitEnterFullscreen) {
-          try { video.webkitEnterFullscreen(); } catch {}
-        }
+        try { video?.webkitEnterFullscreen?.(); } catch {}
       });
     } else if (element?.webkitRequestFullscreen) {
       element.webkitRequestFullscreen();
@@ -264,6 +262,11 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
         controlsList="nodownload noremoteplayback"
         disablePictureInPicture
         onClick={togglePlay}
+        onVolumeChange={(event) => {
+          const video = event.currentTarget;
+          setMuted(video.muted || video.volume === 0);
+          setVolume(video.volume);
+        }}
         onPlay={() => { setPlaying(true); revealControls(); }}
         onPause={(event) => { setPlaying(false); setControlsVisible(true); onProgress?.(event.currentTarget.currentTime); }}
         onWaiting={() => setWaiting(true)}
