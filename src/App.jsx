@@ -5,15 +5,15 @@ import { AuthProvider } from './context/AuthContext';
 import { CatalogProvider } from './context/CatalogContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { I18nProvider } from './i18n/I18nContext';
-import CoursePage from './pages/CoursePage';
-import DashboardPage from './pages/DashboardPage';
-import InstructorPage from './pages/InstructorPage';
 import LandingPage from './pages/LandingPage';
-import LearnPage from './pages/LearnPage';
-import LoginPage from './pages/LoginPage';
-import NotFoundPage from './pages/NotFoundPage';
 
-// Dashboards, the course editor and the legal pages load on demand, so the landing bundle stays small.
+// Pages load on demand so the landing bundle stays as light and fast as possible.
+const CoursePage = lazy(() => import('./pages/CoursePage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const InstructorPage = lazy(() => import('./pages/InstructorPage'));
+const LearnPage = lazy(() => import('./pages/LearnPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
 const CourseEditorPage = lazy(() => import('./pages/CourseEditorPage'));
 const TeachingDashboardPage = lazy(() => import('./pages/TeachingDashboardPage'));

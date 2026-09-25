@@ -25,7 +25,7 @@ if (!apiBase) {
 }
 if (!value('VITE_SITE_URL')) console.warn('VITE_SITE_URL is not set — sitemap.xml will be skipped.');
 
-execSync('npm run build', { stdio: 'inherit' });
+execSync('npm run build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' } });
 
 if (!existsSync('dist/client/.htaccess')) {
   console.error('dist/client/.htaccess is missing — links other than the home page would return 404.');

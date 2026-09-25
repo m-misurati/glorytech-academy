@@ -113,61 +113,61 @@ export const lessonMedia = {
   // Module-1 WAN Concepts
   '00000000-0000-4000-8000-000000001201': {
     provider: 'google_drive',
-    driveFileId: '1ExLB_CFiit4oH0d_J7EdS0GWZTw22eqt',
+    driveFileId: '1wS8t7Nq7cZFk0fZVTYrq_VK6mO-GIb2f',
     mimeType: 'video/mp4',
   },
   // Module-2 VPN and IPsec Concepts
   '00000000-0000-4000-8000-000000001202': {
     provider: 'google_drive',
-    driveFileId: '1AhkoOiRi10ftpJ5yQ6E8zunjfXCCzrFP',
+    driveFileId: '1vzt5Vl30DtilmO2E0GbjgdtmJp2v-bnL',
     mimeType: 'video/mp4',
   },
   // Module-3 Branch Connections
   '00000000-0000-4000-8000-000000001203': {
     provider: 'google_drive',
-    driveFileId: '17uNa4UIQC74lT5-dUVkLjsmrMBVq7M0u',
+    driveFileId: '1eFlAOIYree_WMTj5t7AuJXozVx2s33u0',
     mimeType: 'video/mp4',
   },
   // Module-4 Extended ACLs
   '00000000-0000-4000-8000-000000001204': {
     provider: 'google_drive',
-    driveFileId: '1ncCRTTaz0Gd8Thc08csatfuiNmJeEk_j',
+    driveFileId: '1YJVoRa25B0c8r0UJ-wFhGX02Lz43DFdz',
     mimeType: 'video/mp4',
   },
   // Module-5 QoS Concepts
   '00000000-0000-4000-8000-000000001205': {
     provider: 'google_drive',
-    driveFileId: '143GSZOiyRqhNXV0dgVLIUZN_4pO4q8LV',
+    driveFileId: '1JF7YyNwvdFd9C0HVbfzf7htvn_N3kQ61',
     mimeType: 'video/mp4',
   },
   // Module-6 Network Management
   '00000000-0000-4000-8000-000000001206': {
     provider: 'google_drive',
-    driveFileId: '1gWaEJUKnjVrsJSDSZ7bsVpFLcZwq75Ip',
+    driveFileId: '1XlYmbKsufJb4ThqzOnUIvBi2J28K-JTD',
     mimeType: 'video/mp4',
   },
   // Module-7 Network Design
   '00000000-0000-4000-8000-000000001207': {
     provider: 'google_drive',
-    driveFileId: '1VO9H9pacbtgVQZeSyjapJRQSUpAtewjU',
+    driveFileId: '1FICdC3Fw_F8p9pre9ls8KX43azrFswRJ',
     mimeType: 'video/mp4',
   },
   // Module-8 Network Troubleshooting
   '00000000-0000-4000-8000-000000001208': {
     provider: 'google_drive',
-    driveFileId: '1McOGD6ZuRY6nl7rf7WmgT0gFAssHTvhY',
+    driveFileId: '1fz2jcEyquB-l82M8RVBBquK9k6XMLakD',
     mimeType: 'video/mp4',
   },
   // Module-9 Network Vertualization
   '00000000-0000-4000-8000-000000001209': {
     provider: 'google_drive',
-    driveFileId: '1lY14dgCCeUKwGthhkgu1BYOud6Nx5PFR',
+    driveFileId: '1UvDGH30U_mdoZHxlHpifwO2D8TIYNNYf',
     mimeType: 'video/mp4',
   },
   // Module-10 Network Automation
   '00000000-0000-4000-8000-000000001210': {
     provider: 'google_drive',
-    driveFileId: '1QUPC_GPa89EPJ5QonzTUl26SCON2WdfA',
+    driveFileId: '1o6JFki5A6hpLu7RPvbHfAVZDHYfQWLIs',
     mimeType: 'video/mp4',
   },
 }

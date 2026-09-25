@@ -4,34 +4,34 @@
 
 insert into private.lesson_media (lesson_id, provider, drive_file_id, mime_type)
 values
-  ('00000000-0000-4000-8000-000000001101', 'google_drive', '1cKLJoLyQqKQjoWm9NMGEZhi9JEJpyCD5', 'video/mp4'), -- CCNA1 Introduction to Networks
-  ('00000000-0000-4000-8000-000000001102', 'google_drive', '1GM0GvtAH_vl_uicpYQQUMkrza6vCZLIE', 'video/mp4'), -- Module-1 Networking Today
-  ('00000000-0000-4000-8000-000000001103', 'google_drive', '1KT8wil45XNLgjiCv2BipL_QFtcLTBwG_', 'video/mp4'), -- Module-2 Basic Switch and End Device Configuration
-  ('00000000-0000-4000-8000-000000001104', 'google_drive', '1dYRU1nZ1ug4I9pYs497cXKRAe9CqBHSX', 'video/mp4'), -- Module-3 Protocols and Models
-  ('00000000-0000-4000-8000-000000001105', 'google_drive', '1pfAV1v1tOhyBZhHnQwARxpM0UfuqE8Za', 'video/mp4'), -- Module-4 Physical Layer
-  ('00000000-0000-4000-8000-000000001106', 'google_drive', '15wCdLVu1YIzU-X2QJY2Q777b-H7hjjpQ', 'video/mp4'), -- Module-5 Numbering Systems
-  ('00000000-0000-4000-8000-000000001107', 'google_drive', '1QLEjXwDbJi5C6M9rPtX0Rom0mtvuA6NC', 'video/mp4'), -- Module-6  Data Link Layer
-  ('00000000-0000-4000-8000-000000001108', 'google_drive', '1ucfDIKpvZG_N9FOG6Xv9ot6JAW4Ucuqs', 'video/mp4'), -- Module-7 Ethernet Switching
-  ('00000000-0000-4000-8000-000000001109', 'google_drive', '1NR_iVdfQyFJsW5rIFkzt8Ui3o_P2Ehei', 'video/mp4'), -- Module-8 Network Layer
-  ('00000000-0000-4000-8000-000000001110', 'google_drive', '1G-VT0-CZomD25i2QWg_NQzYZSh4uLFOQ', 'video/mp4'), -- Module-9 Address Resolution
-  ('00000000-0000-4000-8000-000000001111', 'google_drive', '1ySFDMuuykPBJ3glpt6WB8taNVQk1FQQi', 'video/mp4'), -- Module-10 Basic Router Configuration
-  ('00000000-0000-4000-8000-000000001112', 'google_drive', '1I8w6WfUAU8V4ZGzgqHxsfoLyWfj90lZY', 'video/mp4'), -- Module-11 IPv4 Addressing
-  ('00000000-0000-4000-8000-000000001113', 'google_drive', '1dPEn7bf_-glYJWr5ekzVxXGQRjkGT_yI', 'video/mp4'), -- Module-12 IPv6 Addressing
-  ('00000000-0000-4000-8000-000000001114', 'google_drive', '1j2IwfYtCUVRHXXpg5PUI5j5SIQDeErJb', 'video/mp4'), -- Module-13  ICMP
-  ('00000000-0000-4000-8000-000000001115', 'google_drive', '1rK_j83v_fh2VwGeIzf1QgP4c3X8Wa3hS', 'video/mp4'), -- Module-14 Transport Layer
-  ('00000000-0000-4000-8000-000000001116', 'google_drive', '1q704IxYyterB3GcPyMSWhQaw411nVdW2', 'video/mp4'), -- Module-15 Application Layer
-  ('00000000-0000-4000-8000-000000001117', 'google_drive', '1kWBgie0yu9Gs57ZGo0nbRULxKK0AnhqD', 'video/mp4'), -- Module-16 Network Security Fundamentals
-  ('00000000-0000-4000-8000-000000001118', 'google_drive', '13PZdEzOskVwRcsTz2f3sUbHuy0MwyzFr', 'video/mp4'), -- Module-17 Build a Small Network
-  ('00000000-0000-4000-8000-000000001201', 'google_drive', '1ExLB_CFiit4oH0d_J7EdS0GWZTw22eqt', 'video/mp4'), -- Module-1 WAN Concepts
-  ('00000000-0000-4000-8000-000000001202', 'google_drive', '1AhkoOiRi10ftpJ5yQ6E8zunjfXCCzrFP', 'video/mp4'), -- Module-2 VPN and IPsec Concepts
-  ('00000000-0000-4000-8000-000000001203', 'google_drive', '17uNa4UIQC74lT5-dUVkLjsmrMBVq7M0u', 'video/mp4'), -- Module-3 Branch Connections
-  ('00000000-0000-4000-8000-000000001204', 'google_drive', '1ncCRTTaz0Gd8Thc08csatfuiNmJeEk_j', 'video/mp4'), -- Module-4 Extended ACLs
-  ('00000000-0000-4000-8000-000000001205', 'google_drive', '143GSZOiyRqhNXV0dgVLIUZN_4pO4q8LV', 'video/mp4'), -- Module-5 QoS Concepts
-  ('00000000-0000-4000-8000-000000001206', 'google_drive', '1gWaEJUKnjVrsJSDSZ7bsVpFLcZwq75Ip', 'video/mp4'), -- Module-6 Network Management
-  ('00000000-0000-4000-8000-000000001207', 'google_drive', '1VO9H9pacbtgVQZeSyjapJRQSUpAtewjU', 'video/mp4'), -- Module-7 Network Design
-  ('00000000-0000-4000-8000-000000001208', 'google_drive', '1McOGD6ZuRY6nl7rf7WmgT0gFAssHTvhY', 'video/mp4'), -- Module-8 Network Troubleshooting
-  ('00000000-0000-4000-8000-000000001209', 'google_drive', '1lY14dgCCeUKwGthhkgu1BYOud6Nx5PFR', 'video/mp4'), -- Module-9 Network Vertualization
-  ('00000000-0000-4000-8000-000000001210', 'google_drive', '1QUPC_GPa89EPJ5QonzTUl26SCON2WdfA', 'video/mp4') -- Module-10 Network Automation
+  ('00000000-0000-4000-8000-000000001101', 'google_drive', '1PX_g8bqM6YrUwPl5A5JKciTJuXJHB_iJ', 'video/mp4'), -- CCNA1 Introduction to Networks
+  ('00000000-0000-4000-8000-000000001102', 'google_drive', '1hCUp22cHibXpr3a3B2MMEMylKBJVnf7V', 'video/mp4'), -- Module-1 Networking Today
+  ('00000000-0000-4000-8000-000000001103', 'google_drive', '1KjZNTLkO4wh1y7S24xXAPGp6lZNt5XZY', 'video/mp4'), -- Module-2 Basic Switch and End Device Configuration
+  ('00000000-0000-4000-8000-000000001104', 'google_drive', '1dL_J6nSg0yGzKOWMvo0Phcqp79-LDqML', 'video/mp4'), -- Module-3 Protocols and Models
+  ('00000000-0000-4000-8000-000000001105', 'google_drive', '1niEQubLXUC_ms_7isab1w7lcpc_h8Gtp', 'video/mp4'), -- Module-4 Physical Layer
+  ('00000000-0000-4000-8000-000000001106', 'google_drive', '1O2VZ-Mj8Sjvcloq00CKmHRA4CzpQK7En', 'video/mp4'), -- Module-5 Numbering Systems
+  ('00000000-0000-4000-8000-000000001107', 'google_drive', '1cMGBkmaIwHqdrBnWm57luF8hWghCv_1i', 'video/mp4'), -- Module-6  Data Link Layer
+  ('00000000-0000-4000-8000-000000001108', 'google_drive', '1VCT1XZUzE5a3_ODgNZTC4NVAssTINRWb', 'video/mp4'), -- Module-7 Ethernet Switching
+  ('00000000-0000-4000-8000-000000001109', 'google_drive', '1Xku3Gm2FFIKKowqvtOKgcAug1lRh3obL', 'video/mp4'), -- Module-8 Network Layer
+  ('00000000-0000-4000-8000-000000001110', 'google_drive', '17epVy3yFwc-E7QIUHulmuZSy16J9Yegm', 'video/mp4'), -- Module-9 Address Resolution
+  ('00000000-0000-4000-8000-000000001111', 'google_drive', '1S2xWUUQMtmMlTrLoM0euwUKqsy8Cvz7-', 'video/mp4'), -- Module-10 Basic Router Configuration
+  ('00000000-0000-4000-8000-000000001112', 'google_drive', '1uGOSQspqILYe0MB2-sxB8Or4M1Xlkdxl', 'video/mp4'), -- Module-11 IPv4 Addressing
+  ('00000000-0000-4000-8000-000000001113', 'google_drive', '1EjBd7dnWsLx390Q1HrhNYQI-8dncdpCe', 'video/mp4'), -- Module-12 IPv6 Addressing
+  ('00000000-0000-4000-8000-000000001114', 'google_drive', '1xlhz9jwwdPodJOYAcXsD1koLNa89s4mr', 'video/mp4'), -- Module-13  ICMP
+  ('00000000-0000-4000-8000-000000001115', 'google_drive', '1sY9s6GYpzjeYZ-DFYDb_7R0Fp1WFztXn', 'video/mp4'), -- Module-14 Transport Layer
+  ('00000000-0000-4000-8000-000000001116', 'google_drive', '1Z5TUX_ZVAMb4vY1FYC7RxSCt5cBV9_Vd', 'video/mp4'), -- Module-15 Application Layer
+  ('00000000-0000-4000-8000-000000001117', 'google_drive', '1xVEDpU3w1-8PNZGutdvicyNHKDZtY39-', 'video/mp4'), -- Module-16 Network Security Fundamentals
+  ('00000000-0000-4000-8000-000000001118', 'google_drive', '1tgV5b47z6j-oGsMoOnKOwNZN3lDStXAR', 'video/mp4'), -- Module-17 Build a Small Network
+  ('00000000-0000-4000-8000-000000001201', 'google_drive', '1wS8t7Nq7cZFk0fZVTYrq_VK6mO-GIb2f', 'video/mp4'), -- Module-1 WAN Concepts
+  ('00000000-0000-4000-8000-000000001202', 'google_drive', '1vzt5Vl30DtilmO2E0GbjgdtmJp2v-bnL', 'video/mp4'), -- Module-2 VPN and IPsec Concepts
+  ('00000000-0000-4000-8000-000000001203', 'google_drive', '1eFlAOIYree_WMTj5t7AuJXozVx2s33u0', 'video/mp4'), -- Module-3 Branch Connections
+  ('00000000-0000-4000-8000-000000001204', 'google_drive', '1YJVoRa25B0c8r0UJ-wFhGX02Lz43DFdz', 'video/mp4'), -- Module-4 Extended ACLs
+  ('00000000-0000-4000-8000-000000001205', 'google_drive', '1JF7YyNwvdFd9C0HVbfzf7htvn_N3kQ61', 'video/mp4'), -- Module-5 QoS Concepts
+  ('00000000-0000-4000-8000-000000001206', 'google_drive', '1XlYmbKsufJb4ThqzOnUIvBi2J28K-JTD', 'video/mp4'), -- Module-6 Network Management
+  ('00000000-0000-4000-8000-000000001207', 'google_drive', '1FICdC3Fw_F8p9pre9ls8KX43azrFswRJ', 'video/mp4'), -- Module-7 Network Design
+  ('00000000-0000-4000-8000-000000001208', 'google_drive', '1fz2jcEyquB-l82M8RVBBquK9k6XMLakD', 'video/mp4'), -- Module-8 Network Troubleshooting
+  ('00000000-0000-4000-8000-000000001209', 'google_drive', '1UvDGH30U_mdoZHxlHpifwO2D8TIYNNYf', 'video/mp4'), -- Module-9 Network Vertualization
+  ('00000000-0000-4000-8000-000000001210', 'google_drive', '1o6JFki5A6hpLu7RPvbHfAVZDHYfQWLIs', 'video/mp4') -- Module-10 Network Automation
 on conflict (lesson_id) do update set
   provider = excluded.provider,
   drive_file_id = excluded.drive_file_id,
