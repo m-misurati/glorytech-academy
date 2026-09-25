@@ -56,8 +56,8 @@ export default function InstructorPage() {
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {certifications.map((certification) => (
                 <article key={certification.name} className={`card flex flex-col items-center p-5 text-center ${certification.featured ? 'border-glory-500/50 sm:col-span-2' : ''}`}>
-                  <div className={`w-full overflow-hidden rounded-xl bg-white p-2 ${certification.featured ? 'h-40' : 'h-28'}`}>
-                    <img src={certification.logo} alt="" className="h-full w-full object-contain" loading="lazy" />
+                  <div className={`w-full overflow-hidden rounded-xl border border-line bg-white/95 p-2 transition dark:border-white/15 dark:bg-white/10 dark:backdrop-blur-sm ${certification.featured ? 'h-40' : 'h-28'}`}>
+                    <img src={certification.logo} alt="" className="h-full w-full object-contain filter dark:drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)]" loading="lazy" />
                   </div>
                   <p className="mt-4 text-xs font-black text-brand-ink">{certification.issuer}</p>
                   <h3 dir="ltr" className={`mt-1 font-inter font-black ${certification.featured ? 'text-base' : 'text-sm'}`}>{certification.name}</h3>

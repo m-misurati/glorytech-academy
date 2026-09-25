@@ -29,13 +29,13 @@ export default function InstructorCard({ instructor }) {
         {instructor.certifications.length > 0 && (
           <div className="mt-5 flex flex-wrap items-center gap-2">
             {featured && (
-              <span className="grid h-20 w-28 place-items-center rounded-2xl border-2 border-glory-500/50 bg-white p-2 shadow-sm" title={`${featured.issuer} — ${featured.name}`}>
-                <img src={featured.logo} alt={`${featured.issuer} ${featured.name}`} className="max-h-full max-w-full object-contain" />
+              <span className="grid h-20 w-28 place-items-center rounded-2xl border-2 border-glory-500/50 bg-white/95 p-2 shadow-sm transition hover:scale-105 dark:border-glory-500/60 dark:bg-white/10 dark:backdrop-blur-sm" title={`${featured.issuer} — ${featured.name}`}>
+                <img src={featured.logo} alt={`${featured.issuer} ${featured.name}`} className="max-h-full max-w-full object-contain filter dark:drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)]" />
               </span>
             )}
             {shown.map((certification) => (
-              <span key={certification.name} className="grid h-14 w-20 place-items-center rounded-xl border border-line bg-white p-1.5" title={`${certification.issuer} — ${certification.name}`}>
-                <img src={certification.logo} alt={`${certification.issuer} ${certification.name}`} className="max-h-full max-w-full object-contain" loading="lazy" />
+              <span key={certification.name} className="grid h-14 w-20 place-items-center rounded-xl border border-line bg-white/95 p-1.5 transition hover:scale-105 dark:border-white/15 dark:bg-white/10 dark:backdrop-blur-sm" title={`${certification.issuer} — ${certification.name}`}>
+                <img src={certification.logo} alt={`${certification.issuer} ${certification.name}`} className="max-h-full max-w-full object-contain filter dark:drop-shadow-[0_2px_6px_rgba(255,255,255,0.12)]" loading="lazy" />
               </span>
             ))}
             {extra > 0 && <span className="grid h-14 min-w-14 place-items-center rounded-xl border border-line bg-subtle px-3 font-inter text-sm font-black text-brand-ink">+{extra}</span>}
