@@ -4,3 +4,4 @@ Disallow: /dashboard
 Disallow: /learn/
 Disallow: /instructor
 Disallow: /admin
+Sitemap: https://academy.glorytech.ly/sitemap.xml

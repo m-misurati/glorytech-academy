@@ -20,7 +20,7 @@
 
 1. cPanel ← **Domains** ← **Create A New Domain**.
 2. Domain: `academy.glorytech.ly`
-3. أزل علامة **Share document root**، واجعل المسار: `public_html/academy`
+3. أزل علامة **Share document root**. يضع cPanel المسار عادةً في `/home/<حسابك>/academy.glorytech.ly`
 4. **Submit**.
 
 > إذا كانت نسخة cPanel قديمة استخدم **Subdomains** بدل Domains: Subdomain = `academy`، Domain = `glorytech.ly`.
@@ -74,7 +74,8 @@ npm run package:cpanel
 
 ## الخطوة 4 — ارفع الملف
 
-1. cPanel ← **File Manager** ← ادخل `public_html/academy`.
+1. cPanel ← **File Manager** ← ادخل مجلد الدومين: `/home/<حسابك>/academy.glorytech.ly`
+   (تأكد من المسار الصحيح من cPanel ← **Domains** ← العمود Document Root).
 2. **Settings** ← فعّل **Show Hidden Files (dotfiles)** — مهم ليظهر `.htaccess`.
 3. احذف أي ملف افتراضي موجود (`default.html` أو `index.html`).
 4. **Upload** ← اختر `glorytech-site.zip`.

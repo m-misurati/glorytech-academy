@@ -2,6 +2,7 @@
 // Usage: npm run package:cpanel
 import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const env = existsSync('.env') ? readFileSync('.env', 'utf8') : '';
 
@@ -33,18 +34,40 @@ if (!existsSync('dist/client/.htaccess')) {
 
 const zip = 'glorytech-site.zip';
 rmSync(zip, { force: true });
-// Windows 10+ ships bsdtar, which writes zip archives (-a) and keeps dotfiles such as .htaccess.
-// .assetsignore only means something to Cloudflare, so it stays out of the cPanel package.
-execFileSync('tar', ['-a', '-c', '-f', zip, '-C', 'dist/client', '--exclude', './.assetsignore', '.']);
 
-const listing = execFileSync('tar', ['-t', '-f', zip], { encoding: 'utf8' });
+// Only Cloudflare reads this file; it has no meaning on cPanel.
+rmSync('dist/client/.assetsignore', { force: true });
+
+// Git Bash ships GNU tar, which cannot write zip archives: "tar -a -cf x.zip"
+// silently produces a plain tar that Windows and cPanel both refuse to open.
+// .NET writes a real zip and keeps dotfiles such as .htaccess.
+const source = resolve('dist/client');
+const target = resolve(zip);
+execFileSync('powershell', [
+  '-NoProfile', '-NonInteractive', '-Command',
+  `Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('${source}','${target}',[System.IO.Compression.CompressionLevel]::Optimal,$false)`,
+], { stdio: 'inherit' });
+
+// A zip always starts with "PK"; anything else means the archive is not a zip.
+const signature = readFileSync(target).subarray(0, 2).toString('latin1');
+if (signature !== 'PK') {
+  console.error(`${zip} is not a zip archive (starts with ${JSON.stringify(signature)})`);
+  process.exit(1);
+}
+
+const listing = execFileSync('powershell', [
+  '-NoProfile', '-NonInteractive', '-Command',
+  `Add-Type -AssemblyName System.IO.Compression.FileSystem; $z=[System.IO.Compression.ZipFile]::OpenRead('${target}'); $z.Entries | ForEach-Object { $_.FullName }; $z.Dispose()`,
+], { encoding: 'utf8' });
+
 for (const required of ['.htaccess', 'index.html']) {
-  if (!listing.split(/\r?\n/).some((line) => line === `./${required}`)) {
+  if (!listing.split(/\r?\n/).some((line) => line.trim() === required)) {
     console.error(`${zip} does not contain ${required}`);
     process.exit(1);
   }
 }
 
 const mb = (statSync(zip).size / 1048576).toFixed(1);
+console.log(`entries: ${listing.split(/\r?\n/).filter((l) => l.trim()).length}`);
 console.log(`\n${zip} ready (${mb} MB), API at ${apiBase}`);
-console.log('Upload it to public_html/academy in cPanel File Manager, then Extract.');
+console.log('Upload it to the domain folder in cPanel File Manager (Domains -> Document Root), then Extract.');
