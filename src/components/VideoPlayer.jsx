@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Gauge, Loader2, Maximize, Minimize, Pause, Play, RotateCcw, RotateCw, Volume2, VolumeX } from 'lucide-react';
+import { AlertTriangle, Gauge, Loader2, Maximize, Minimize, Pause, Play, RotateCcw, RotateCw, Volume2, VolumeX, X } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext';
 import SeekPreview from './SeekPreview';
 
@@ -23,7 +23,8 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
   const hideTimer = useRef(null);
   const resumeAt = useRef(startAt || 0);
   const lastReported = useRef(0);
-  const codecChecked = useRef(false);
+  const supportsHevc = useRef(true);
+  const hoverPointer = useRef(false);
   const autoRetries = useRef(0);
   const retryTimer = useRef(null);
   const resumePlaying = useRef(false);
@@ -40,6 +41,7 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
   const [muted, setMuted] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
+  const [warningDismissed, setWarningDismissed] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
 
@@ -47,10 +49,21 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
     setFailed(false);
     setWaiting(true);
     setNoVideoTrack(false);
+    setWarningDismissed(false);
     setHover(null);
     setPreviewArmed(false);
-    codecChecked.current = false;
   }, [src]);
+
+  // Safari plays H.265, so a black picture there is never a codec problem and the
+  // warning would only mislead. Chrome and Firefox on Windows are the real case.
+  useEffect(() => {
+    const probe = document.createElement('video');
+    supportsHevc.current = probe.canPlayType('video/mp4; codecs="hvc1.1.6.L93.B0"') !== '';
+    // The seek preview is a second <video> on the same file. An iPhone decodes one
+    // video at a time, so arming it there blanks the lesson and leaves only sound.
+    // Safari fires mousemove on a tap, so the pointer type decides, not the event.
+    hoverPointer.current = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ?? true;
+  }, []);
 
   useEffect(() => {
     const onChange = () => setFullscreen(document.fullscreenElement === containerRef.current);
@@ -111,8 +124,15 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
   };
 
   const toggleFullscreen = () => {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else containerRef.current?.requestFullscreen?.();
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      return;
+    }
+    // iPhone Safari has no Fullscreen API on elements; only the video itself can go
+    // fullscreen, and it does so with the native iOS controls.
+    if (containerRef.current?.requestFullscreen) containerRef.current.requestFullscreen().catch(() => {});
+    else if (videoRef.current?.webkitEnterFullscreen) videoRef.current.webkitEnterFullscreen();
+    else containerRef.current?.webkitRequestFullscreen?.();
   };
 
   const handleKeyDown = (event) => {
@@ -213,12 +233,11 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
           const seconds = video.currentTime;
           setCurrentTime(seconds);
           updateBuffered();
-          // Audio playing with no decoded frames means the browser cannot handle the
-          // video codec (H.265/HEVC does this in Chrome and Firefox on Windows).
-          if (!codecChecked.current && seconds > 2) {
-            codecChecked.current = true;
-            const frames = video.getVideoPlaybackQuality?.().totalVideoFrames ?? video.webkitDecodedFrameCount;
-            if (video.videoWidth === 0 || frames === 0) setNoVideoTrack(true);
+          // Audio running with no picture size means the browser cannot decode the
+          // video track (H.265/HEVC does this in Chrome and Firefox on Windows).
+          // Re-read it every tick so the notice clears itself once a frame arrives.
+          if (seconds > 3 && !supportsHevc.current) {
+            setNoVideoTrack(video.readyState >= 2 && video.videoWidth === 0);
           }
           // Report roughly every 15s so the lesson can be resumed later.
           if (onProgress && Math.abs(seconds - lastReported.current) > 15) {
@@ -249,11 +268,19 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
         </button>
       )}
 
-      {noVideoTrack && !failed && (
-        <div dir={dir} className="pointer-events-none absolute inset-x-0 top-0 p-4">
+      {noVideoTrack && !warningDismissed && !failed && (
+        <div dir={dir} className="absolute inset-x-0 top-0 p-4">
           <div className="mx-auto flex max-w-xl items-start gap-3 rounded-2xl bg-amber-500/95 p-4 text-start text-sm font-bold text-[#3a2600] shadow-xl">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
-            <span>{t('player.codecWarning')}</span>
+            <span className="flex-1">{t('player.codecWarning')}</span>
+            <button
+              type="button"
+              onClick={() => setWarningDismissed(true)}
+              aria-label={t('common.close')}
+              className="-m-1 grid h-8 w-8 shrink-0 place-items-center rounded-full hover:bg-black/10"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
       )}
@@ -279,7 +306,7 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
             const rect = event.currentTarget.getBoundingClientRect();
             const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1);
             setHover({ ratio, time: ratio * duration });
-            setPreviewArmed(true);
+            if (hoverPointer.current) setPreviewArmed(true);
           }}
           onMouseLeave={() => setHover(null)}
         >
