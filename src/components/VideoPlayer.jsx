@@ -128,11 +128,19 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
       document.exitFullscreen();
       return;
     }
-    // iPhone Safari has no Fullscreen API on elements; only the video itself can go
-    // fullscreen, and it does so with the native iOS controls.
-    if (containerRef.current?.requestFullscreen) containerRef.current.requestFullscreen().catch(() => {});
-    else if (videoRef.current?.webkitEnterFullscreen) videoRef.current.webkitEnterFullscreen();
-    else containerRef.current?.webkitRequestFullscreen?.();
+    // An iPhone puts only the video itself fullscreen, with the native iOS controls.
+    // Safari still exposes requestFullscreen there but refuses it, and reports the
+    // refusal through document.fullscreenEnabled rather than by throwing.
+    const nativeIos = () => {
+      try { videoRef.current?.webkitEnterFullscreen?.(); } catch { /* not loaded yet */ }
+    };
+    const element = containerRef.current;
+    if (!element?.requestFullscreen || document.fullscreenEnabled === false) {
+      if (videoRef.current?.webkitEnterFullscreen) nativeIos();
+      else element?.webkitRequestFullscreen?.();
+      return;
+    }
+    element.requestFullscreen().catch(nativeIos);
   };
 
   const handleKeyDown = (event) => {
