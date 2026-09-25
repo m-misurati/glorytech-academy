@@ -6,6 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/I18nContext';
 import { usePageMeta } from '../lib/meta';
 
+// Supabase decides the code length (Authentication -> Email -> OTP length, 6 by
+// default, up to 10). Accept any length in that range so the form keeps working
+// whichever value the project is set to.
+const OTP_MIN_LENGTH = 6;
+const OTP_MAX_LENGTH = 10;
+
 const emptyProfile = { displayName: '', phone: '', affiliation: '' };
 
 class FormError extends Error {}
@@ -189,9 +195,9 @@ export default function LoginPage() {
                 <form onSubmit={confirmOtp} className="mt-8 space-y-5">
                   <label className="block">
                     <span className="mb-2 block text-sm font-black">{t('login.code')}</span>
-                    <span className="field py-3.5"><KeyRound className="h-5 w-5 text-muted" /><input dir="ltr" value={token} onChange={(event) => setToken(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" required minLength={6} maxLength={6} placeholder="000000" className="text-center font-inter text-2xl tracking-[.45em]" /></span>
+                    <span className="field py-3.5"><KeyRound className="h-5 w-5 text-muted" /><input dir="ltr" value={token} onChange={(event) => setToken(event.target.value.replace(/\D/g, '').slice(0, OTP_MAX_LENGTH))} inputMode="numeric" autoComplete="one-time-code" required minLength={OTP_MIN_LENGTH} maxLength={OTP_MAX_LENGTH} placeholder={'0'.repeat(OTP_MIN_LENGTH)} className="text-center font-inter text-xl tracking-[.35em] sm:text-2xl" /></span>
                   </label>
-                  <button disabled={busy || token.length !== 6} className="btn-primary w-full py-4">
+                  <button disabled={busy || token.length < OTP_MIN_LENGTH} className="btn-primary w-full py-4">
                     {busy ? t('login.verifying') : mode === 'signup' ? t('login.verifySignup') : t('login.verifyLogin')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" />
                   </button>
                   <button type="button" disabled={cooldown > 0 || busy} onClick={requestOtp} className="w-full text-center text-sm font-black text-brand-ink disabled:text-muted">
