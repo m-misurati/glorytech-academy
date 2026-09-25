@@ -66,9 +66,28 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
   }, []);
 
   useEffect(() => {
-    const onChange = () => setFullscreen(document.fullscreenElement === containerRef.current);
+    const onChange = () => {
+      setFullscreen(Boolean(document.fullscreenElement === containerRef.current || document.webkitFullscreenElement === containerRef.current));
+    };
     document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+
+    const video = videoRef.current;
+    const onIosBegin = () => setFullscreen(true);
+    const onIosEnd = () => setFullscreen(false);
+    if (video) {
+      video.addEventListener('webkitbeginfullscreen', onIosBegin);
+      video.addEventListener('webkitendfullscreen', onIosEnd);
+    }
+
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('webkitfullscreenchange', onChange);
+      if (video) {
+        video.removeEventListener('webkitbeginfullscreen', onIosBegin);
+        video.removeEventListener('webkitendfullscreen', onIosEnd);
+      }
+    };
   }, []);
 
   useEffect(() => () => {
@@ -123,24 +142,53 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
     setSpeedMenuOpen(false);
   };
 
-  const toggleFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-      return;
-    }
-    // An iPhone puts only the video itself fullscreen, with the native iOS controls.
-    // Safari still exposes requestFullscreen there but refuses it, and reports the
-    // refusal through document.fullscreenEnabled rather than by throwing.
-    const nativeIos = () => {
-      try { videoRef.current?.webkitEnterFullscreen?.(); } catch { /* not loaded yet */ }
-    };
+  const toggleFullscreen = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
+    const video = videoRef.current;
     const element = containerRef.current;
-    if (!element?.requestFullscreen || document.fullscreenEnabled === false) {
-      if (videoRef.current?.webkitEnterFullscreen) nativeIos();
-      else element?.webkitRequestFullscreen?.();
+
+    // 1. If currently in fullscreen, exit it:
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       return;
     }
-    element.requestFullscreen().catch(nativeIos);
+    if (video?.webkitDisplayingFullscreen) {
+      try { video.webkitExitFullscreen?.(); } catch {}
+      return;
+    }
+
+    // 2. Detect iOS / iPhone directly
+    const isIOS = typeof navigator !== 'undefined' && (
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    );
+
+    // On iPhone, standard Element.requestFullscreen is not supported or rejected.
+    // video.webkitEnterFullscreen MUST be called synchronously inside the user gesture.
+    if (isIOS && video?.webkitEnterFullscreen) {
+      try {
+        video.webkitEnterFullscreen();
+        return;
+      } catch (err) {
+        console.warn('webkitEnterFullscreen failed:', err);
+      }
+    }
+
+    // 3. Standard Fullscreen API for Android, desktop Chrome, Firefox, Safari desktop
+    if (element?.requestFullscreen) {
+      element.requestFullscreen().catch(() => {
+        if (video?.webkitEnterFullscreen) {
+          try { video.webkitEnterFullscreen(); } catch {}
+        }
+      });
+    } else if (element?.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen();
+    } else if (video?.webkitEnterFullscreen) {
+      try { video.webkitEnterFullscreen(); } catch {}
+    }
   };
 
   const handleKeyDown = (event) => {
