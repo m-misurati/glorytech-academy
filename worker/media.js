@@ -5,109 +5,109 @@ export const lessonMedia = {
   // CCNA1 Introduction to Networks
   '00000000-0000-4000-8000-000000001101': {
     provider: 'google_drive',
-    driveFileId: '1cKLJoLyQqKQjoWm9NMGEZhi9JEJpyCD5',
+    driveFileId: '1PX_g8bqM6YrUwPl5A5JKciTJuXJHB_iJ',
     mimeType: 'video/mp4',
   },
   // Module-1 Networking Today
   '00000000-0000-4000-8000-000000001102': {
     provider: 'google_drive',
-    driveFileId: '1GM0GvtAH_vl_uicpYQQUMkrza6vCZLIE',
+    driveFileId: '1hCUp22cHibXpr3a3B2MMEMylKBJVnf7V',
     mimeType: 'video/mp4',
   },
   // Module-2 Basic Switch and End Device Configuration
   '00000000-0000-4000-8000-000000001103': {
     provider: 'google_drive',
-    driveFileId: '1KT8wil45XNLgjiCv2BipL_QFtcLTBwG_',
+    driveFileId: '1KjZNTLkO4wh1y7S24xXAPGp6lZNt5XZY',
     mimeType: 'video/mp4',
   },
   // Module-3 Protocols and Models
   '00000000-0000-4000-8000-000000001104': {
     provider: 'google_drive',
-    driveFileId: '1dYRU1nZ1ug4I9pYs497cXKRAe9CqBHSX',
+    driveFileId: '1dL_J6nSg0yGzKOWMvo0Phcqp79-LDqML',
     mimeType: 'video/mp4',
   },
   // Module-4 Physical Layer
   '00000000-0000-4000-8000-000000001105': {
     provider: 'google_drive',
-    driveFileId: '1pfAV1v1tOhyBZhHnQwARxpM0UfuqE8Za',
+    driveFileId: '1niEQubLXUC_ms_7isab1w7lcpc_h8Gtp',
     mimeType: 'video/mp4',
   },
   // Module-5 Numbering Systems
   '00000000-0000-4000-8000-000000001106': {
     provider: 'google_drive',
-    driveFileId: '15wCdLVu1YIzU-X2QJY2Q777b-H7hjjpQ',
+    driveFileId: '1O2VZ-Mj8Sjvcloq00CKmHRA4CzpQK7En',
     mimeType: 'video/mp4',
   },
   // Module-6  Data Link Layer
   '00000000-0000-4000-8000-000000001107': {
     provider: 'google_drive',
-    driveFileId: '1QLEjXwDbJi5C6M9rPtX0Rom0mtvuA6NC',
+    driveFileId: '1cMGBkmaIwHqdrBnWm57luF8hWghCv_1i',
     mimeType: 'video/mp4',
   },
   // Module-7 Ethernet Switching
   '00000000-0000-4000-8000-000000001108': {
     provider: 'google_drive',
-    driveFileId: '1ucfDIKpvZG_N9FOG6Xv9ot6JAW4Ucuqs',
+    driveFileId: '1VCT1XZUzE5a3_ODgNZTC4NVAssTINRWb',
     mimeType: 'video/mp4',
   },
   // Module-8 Network Layer
   '00000000-0000-4000-8000-000000001109': {
     provider: 'google_drive',
-    driveFileId: '1NR_iVdfQyFJsW5rIFkzt8Ui3o_P2Ehei',
+    driveFileId: '1Xku3Gm2FFIKKowqvtOKgcAug1lRh3obL',
     mimeType: 'video/mp4',
   },
   // Module-9 Address Resolution
   '00000000-0000-4000-8000-000000001110': {
     provider: 'google_drive',
-    driveFileId: '1G-VT0-CZomD25i2QWg_NQzYZSh4uLFOQ',
+    driveFileId: '17epVy3yFwc-E7QIUHulmuZSy16J9Yegm',
     mimeType: 'video/mp4',
   },
   // Module-10 Basic Router Configuration
   '00000000-0000-4000-8000-000000001111': {
     provider: 'google_drive',
-    driveFileId: '1ySFDMuuykPBJ3glpt6WB8taNVQk1FQQi',
+    driveFileId: '1S2xWUUQMtmMlTrLoM0euwUKqsy8Cvz7-',
     mimeType: 'video/mp4',
   },
   // Module-11 IPv4 Addressing
   '00000000-0000-4000-8000-000000001112': {
     provider: 'google_drive',
-    driveFileId: '1I8w6WfUAU8V4ZGzgqHxsfoLyWfj90lZY',
+    driveFileId: '1uGOSQspqILYe0MB2-sxB8Or4M1Xlkdxl',
     mimeType: 'video/mp4',
   },
   // Module-12 IPv6 Addressing
   '00000000-0000-4000-8000-000000001113': {
     provider: 'google_drive',
-    driveFileId: '1dPEn7bf_-glYJWr5ekzVxXGQRjkGT_yI',
+    driveFileId: '1EjBd7dnWsLx390Q1HrhNYQI-8dncdpCe',
     mimeType: 'video/mp4',
   },
   // Module-13  ICMP
   '00000000-0000-4000-8000-000000001114': {
     provider: 'google_drive',
-    driveFileId: '1j2IwfYtCUVRHXXpg5PUI5j5SIQDeErJb',
+    driveFileId: '1xlhz9jwwdPodJOYAcXsD1koLNa89s4mr',
     mimeType: 'video/mp4',
   },
   // Module-14 Transport Layer
   '00000000-0000-4000-8000-000000001115': {
     provider: 'google_drive',
-    driveFileId: '1rK_j83v_fh2VwGeIzf1QgP4c3X8Wa3hS',
+    driveFileId: '1sY9s6GYpzjeYZ-DFYDb_7R0Fp1WFztXn',
     mimeType: 'video/mp4',
   },
   // Module-15 Application Layer
   '00000000-0000-4000-8000-000000001116': {
     provider: 'google_drive',
-    driveFileId: '1q704IxYyterB3GcPyMSWhQaw411nVdW2',
+    driveFileId: '1Z5TUX_ZVAMb4vY1FYC7RxSCt5cBV9_Vd',
     mimeType: 'video/mp4',
   },
   // Module-16 Network Security Fundamentals
   '00000000-0000-4000-8000-000000001117': {
     provider: 'google_drive',
-    driveFileId: '1kWBgie0yu9Gs57ZGo0nbRULxKK0AnhqD',
+    driveFileId: '1xVEDpU3w1-8PNZGutdvicyNHKDZtY39-',
     mimeType: 'video/mp4',
   },
   // Module-17 Build a Small Network
   '00000000-0000-4000-8000-000000001118': {
     provider: 'google_drive',
-    driveFileId: '13PZdEzOskVwRcsTz2f3sUbHuy0MwyzFr',
+    driveFileId: '1tgV5b47z6j-oGsMoOnKOwNZN3lDStXAR',
     mimeType: 'video/mp4',
   },
   // Module-1 WAN Concepts
