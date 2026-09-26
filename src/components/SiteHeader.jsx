@@ -9,7 +9,6 @@ import Brand from './Brand';
 const sections = [
   { key: 'home', hash: '#home' },
   { key: 'courses', hash: '#courses' },
-  { key: 'upcoming', hash: '#upcoming' },
   { key: 'instructors', hash: '#instructors' },
   { key: 'contact', hash: '#contact' },
 ];
@@ -97,7 +96,7 @@ export default function SiteHeader({ compact = false }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const menuBreakpoint = compact ? 'lg:hidden' : 'xl:hidden';
+  const menuBreakpoint = 'lg:hidden';
   const themeLabel = isDark ? t('nav.themeLight') : t('nav.themeDark');
 
   const toggles = (
@@ -105,27 +104,28 @@ export default function SiteHeader({ compact = false }) {
       <button type="button" onClick={toggleTheme} className={iconButton} aria-label={themeLabel} title={themeLabel}>
         {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
       </button>
-      <button type="button" onClick={toggleLang} className="flex h-10 items-center gap-1.5 rounded-xl px-2.5 text-sm font-black text-muted transition hover:bg-subtle hover:text-ink" aria-label={t('nav.switchLanguageLabel')}>
+      <button type="button" onClick={toggleLang} className="flex h-10 items-center gap-1.5 rounded-xl px-2 text-sm font-black text-muted transition hover:bg-subtle hover:text-ink xl:px-2.5" aria-label={t('nav.switchLanguageLabel')}>
         <Languages className="h-5 w-5" />
-        <span>{t('nav.switchLanguage')}</span>
+        {/* The label costs more width than it earns between 1024px and 1280px. */}
+        <span className="hidden xl:inline">{t('nav.switchLanguage')}</span>
       </button>
     </>
   );
 
   return (
     <header className={`sticky top-0 z-40 border-b transition-colors ${scrolled ? 'border-line bg-canvas/90 shadow-sm backdrop-blur-xl' : 'border-transparent bg-canvas/80 backdrop-blur-md'}`}>
-      <nav aria-label={t('nav.mainNav')} className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-5 lg:px-8">
+      <nav aria-label={t('nav.mainNav')} className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-2 px-4 sm:px-5 lg:px-4 xl:gap-4 xl:px-8">
         <Brand compact />
 
         {!compact && (
-          <div className="hidden items-center gap-0.5 xl:flex">
+          <div className="hidden items-center gap-0.5 lg:flex">
             {sections.map((section) => (
-              <Link key={section.key} to={{ pathname: '/', hash: section.hash }} className="rounded-xl px-3 py-2 text-sm font-bold text-muted transition hover:bg-subtle hover:text-brand-ink">
+              <Link key={section.key} to={{ pathname: '/', hash: section.hash }} className="whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold text-muted transition hover:bg-subtle hover:text-brand-ink xl:px-3">
                 {t(`nav.${section.key}`)}
               </Link>
             ))}
             {pageLinks.map((link) => (
-              <Link key={link.key} to={link.to} className="rounded-xl px-3 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-soft">
+              <Link key={link.key} to={link.to} className="whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold text-brand-ink transition hover:bg-brand-soft xl:px-3">
                 {t(`nav.${link.key}`)}
               </Link>
             ))}
@@ -139,8 +139,8 @@ export default function SiteHeader({ compact = false }) {
             <AccountMenu />
           ) : (
             <>
-              <Link to="/login" className="rounded-xl px-3 py-2 text-sm font-bold text-ink hover:text-brand-ink">{t('nav.login')}</Link>
-              <Link to="/login?mode=signup" className="btn-primary px-5 py-2.5 text-sm">
+              <Link to="/login" className="whitespace-nowrap rounded-xl px-2 py-2 text-sm font-bold text-ink hover:text-brand-ink xl:px-3">{t('nav.login')}</Link>
+              <Link to="/login?mode=signup" className="btn-primary whitespace-nowrap px-4 py-2.5 text-sm xl:px-5">
                 {t('nav.startFree')} <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
               </Link>
             </>
