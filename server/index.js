@@ -31,7 +31,7 @@ const MIME = {
 
 // Only these reach the browser. Secrets (service role key, signing secret) stay
 // on the Worker and must never be listed here.
-const PUBLIC_CONFIG_KEYS = ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'API_BASE', 'CONTACT_EMAIL', 'TELEGRAM_CHANNEL'];
+const PUBLIC_CONFIG_KEYS = ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'API_BASE', 'CONTACT_EMAIL', 'TELEGRAM_CHANNEL', 'GA_ID'];
 
 function publicConfig() {
   const config = {};

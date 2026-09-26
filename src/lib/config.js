@@ -18,4 +18,6 @@ export const config = {
   apiBase: read('API_BASE', import.meta.env.VITE_API_BASE).replace(/\/+$/, ''),
   contactEmail: read('CONTACT_EMAIL', import.meta.env.VITE_CONTACT_EMAIL),
   telegramChannel: read('TELEGRAM_CHANNEL', import.meta.env.VITE_TELEGRAM_CHANNEL),
+  // Google Analytics 4 measurement id, e.g. G-XXXXXXXXXX. Empty means no tracking.
+  gaId: read('GA_ID', import.meta.env.VITE_GA_ID),
 };

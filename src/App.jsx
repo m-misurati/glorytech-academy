@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import { startAnalytics, trackPageView } from './lib/analytics';
 import { AuthProvider } from './context/AuthContext';
 import { CatalogProvider } from './context/CatalogContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -47,6 +48,21 @@ function ScrollManager() {
   return null;
 }
 
+// A single page app never reloads, so Analytics would only ever see the first visit.
+// Each route change is reported once the new page has had a moment to set its title.
+function AnalyticsManager() {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => { startAnalytics(); }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => trackPageView(`${pathname}${search}`), 300);
+    return () => window.clearTimeout(timer);
+  }, [pathname, search]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -54,6 +70,7 @@ export default function App() {
         <AuthProvider>
           <CatalogProvider>
             <ScrollManager />
+            <AnalyticsManager />
             <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/" element={<LandingPage />} />

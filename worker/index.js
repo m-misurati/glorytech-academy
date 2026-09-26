@@ -106,7 +106,7 @@ async function handleStream(request, env, ctx, token) {
   // cached once; the next learner on the same lesson is served from Cloudflare.
   const chunkIndex = Math.floor(range.start / CHUNK_SIZE)
   const chunkStart = chunkIndex * CHUNK_SIZE
-  const cacheKey = new Request(`https://media.cache.invalid/${media.driveFileId}/${chunkIndex}`)
+  const cacheKey = new Request(`https://media.cache.invalid/${CACHE_VERSION}/${media.driveFileId}/${chunkIndex}`)
 
   const hit = await caches.default.match(cacheKey)
   if (hit) {
@@ -150,6 +150,10 @@ async function handleStream(request, env, ctx, token) {
 
 // 4 MB keeps a cold seek short (few seconds from Drive) while a lesson still
 // needs only a few dozen cached objects.
+// Cached chunks live in each Cloudflare location for a week and survive a deploy, so
+// replacing a lecture in place on Drive leaves some regions serving the old bytes while
+// others serve the new ones. Bumping this retires every cached chunk everywhere at once.
+const CACHE_VERSION = 'v2'
 const CHUNK_SIZE = 4 * 1024 * 1024
 
 function partialResponse(request, media, body, start, end, total, length) {

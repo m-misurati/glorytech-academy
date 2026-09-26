@@ -86,42 +86,66 @@ for (const [index, name] of pending.entries()) {
   }
   console.log(`  measured ${Number(measured.input_i).toFixed(1)} LUFS, peak ${Number(measured.input_tp).toFixed(1)} dB -> raising by ${(TARGET_LUFS - Number(measured.input_i)).toFixed(1)} dB`);
 
-  // Pass 2: apply the measured gain and copy the picture untouched.
-  const filter = [
-    `loudnorm=I=${TARGET_LUFS}:TP=${TRUE_PEAK}:LRA=${LOUDNESS_RANGE}`,
+  // Pass 2: raise it, keeping the picture bit for bit.
+  // Three strategies, gentlest first. Most lectures need only a single fixed gain.
+  // A few change level part way through -- one sits at -35 dB for its first quarter
+  // and -14 dB in the middle -- and for those a fixed gain, or even loudnorm's own
+  // dynamic mode, leaves the quiet stretches inaudible on a phone. Those get a gain
+  // that follows the recording over a moving window.
+  const measuredArgs = [
     `measured_I=${measured.input_i}`,
     `measured_TP=${measured.input_tp}`,
     `measured_LRA=${measured.input_lra}`,
     `measured_thresh=${measured.input_thresh}`,
     `offset=${measured.target_offset}`,
-    'linear=true',
-    'print_format=summary',
   ].join(':');
+  const loudnorm = (linear) => `loudnorm=I=${TARGET_LUFS}:TP=${TRUE_PEAK}:LRA=${LOUDNESS_RANGE}:${measuredArgs}:linear=${linear}:print_format=summary`;
 
-  run(['-y', '-i', source, '-map', '0:v:0', '-map', '0:a:0', '-c:v', 'copy', '-af', filter,
-    '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-ac', '2', '-movflags', '+faststart', partial]);
+  const strategies = [
+    ['a fixed gain', loudnorm('true')],
+    ['loudnorm following the level', loudnorm('false')],
+    // f: window in ms, g: smoothing, m: how much it may lift, p: how close to the peak.
+    ['a moving-window gain', `dynaudnorm=f=400:g=21:p=0.9:m=25:r=0.0:n=1,alimiter=limit=0.89`],
+  ];
 
-  if (!existsSync(partial)) {
-    console.error('  ffmpeg produced nothing -- skipped\n');
-    failures += 1;
-    continue;
+  const length = duration(source);
+  const probePoints = [0.05, 0.25, 0.5, 0.75, 0.92].map((f) => Math.round(length * f));
+
+  let accepted = null;
+  let level = NaN;
+  let broken = '';
+  for (const [label, filter] of strategies) {
+    rmSync(partial, { force: true });
+    run(['-y', '-i', source, '-map', '0:v:0', '-map', '0:a:0', '-c:v', 'copy', '-af', filter,
+      '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-ac', '2', '-movflags', '+faststart', partial]);
+    if (!existsSync(partial)) { broken = 'ffmpeg produced nothing'; continue; }
+
+    const sameVideo = videoFacts(source) === videoFacts(partial);
+    const sameLength = Math.abs(duration(source) - duration(partial)) <= 2;
+    if (!sameVideo || !sameLength) {
+      broken = `video ${sameVideo ? 'ok' : 'changed'}, length ${sameLength ? 'ok' : 'differs'}`;
+      break;
+    }
+
+    // Sampled across the whole lecture, so an uneven recording cannot slip through.
+    const samples = probePoints.map((at) => meanVolume(partial, at)).filter(Number.isFinite);
+    if (!samples.length) { broken = 'could not measure the result'; break; }
+    level = samples.reduce((sum, value) => sum + value, 0) / samples.length;
+    if (Math.min(...samples) > -28) { accepted = label; break; }
+    broken = `quietest stretch still at ${Math.min(...samples).toFixed(1)} dB`;
   }
 
-  // The picture must be identical and the sound must actually be louder now.
-  const sameVideo = videoFacts(source) === videoFacts(partial);
-  const sameLength = Math.abs(duration(source) - duration(partial)) <= 2;
-  const after = [300, 1200].map((at) => meanVolume(partial, at)).filter(Number.isFinite);
-  const loudEnough = after.length > 0 && after.reduce((s, v) => s + v, 0) / after.length > -26;
-
-  if (!sameVideo || !sameLength || !loudEnough) {
-    console.error(`  verification failed (video ${sameVideo ? 'ok' : 'changed'}, length ${sameLength ? 'ok' : 'differs'}, level ${loudEnough ? 'ok' : 'still low'}) -- discarded\n`);
+  if (!accepted) {
+    console.error(`  ${broken} -- discarded
+`);
     rmSync(partial, { force: true });
     failures += 1;
     continue;
   }
 
   renameSync(partial, finished);
-  console.log(`  now ${(after.reduce((s, v) => s + v, 0) / after.length).toFixed(1)} dB mean, picture untouched, ${(statSync(finished).size / 1048576).toFixed(0)}MB\n`);
+  console.log(`  ${accepted}: now ${level.toFixed(1)} dB mean, picture untouched, ${(statSync(finished).size / 1048576).toFixed(0)}MB
+`);
 }
 
 console.log(`done in ${clock((Date.now() - startedAt) / 1000)} -- ${targetDir}`);

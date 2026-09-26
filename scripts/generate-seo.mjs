@@ -44,6 +44,8 @@ if (!siteUrl) {
 const paths = [
   '/',
   '/login',
+  '/b2b',
+  '/teach',
   '/legal/terms',
   '/legal/privacy',
   ...courses.map((course) => `/courses/${course.slug}`),
