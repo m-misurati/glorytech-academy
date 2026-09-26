@@ -115,14 +115,14 @@ export default function LandingPage() {
         </section>
 
         <section className="px-5 lg:px-8">
-          <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-[2rem] bg-[#0f1a15] p-8 text-white sm:p-12 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-6 overflow-hidden rounded-[2rem] bg-[#0f1a15] p-6 text-white sm:p-12 lg:flex-row lg:items-center lg:justify-between">
             <div className="pointer-events-none absolute -top-24 end-[-6rem] h-72 w-72 rounded-full bg-[#229ED9]/25 blur-2xl" />
             <div className="pointer-events-none absolute -bottom-28 start-[-4rem] h-72 w-72 rounded-full bg-glory-500/25 blur-2xl" />
-            <div className="relative flex items-start gap-5">
+            <div className="relative flex w-full min-w-0 items-start gap-4 lg:w-auto sm:gap-5">
               <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-[#229ED9] shadow-lg"><TelegramIcon className="h-9 w-9 text-white" /></span>
-              <div>
-                <h2 className="text-2xl font-black sm:text-3xl">{t('telegram.title')}</h2>
-                <p className="mt-2 max-w-xl font-medium leading-8 text-white/70">{t('telegram.text')}</p>
+              <div className="min-w-0">
+                <h2 className="text-xl font-black sm:text-3xl">{t('telegram.title')}</h2>
+                <p className="mt-2 max-w-xl text-sm font-medium leading-7 text-white/70 sm:text-base sm:leading-8">{t('telegram.text')}</p>
                 <p dir="ltr" className="mt-1 text-start font-inter font-bold text-[#7cc8ee] rtl:text-right">{site.telegramHandle}</p>
               </div>
             </div>

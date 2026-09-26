@@ -219,7 +219,9 @@ const ar = {
   },
   telegram: {
     title: 'انضم إلينا في قناة تيليجرام',
-    text: 'إعلانات الكورسات الجديدة، مواعيد الإطلاق ونصائح تقنية، كلها في قناة GloryTech Academy.',
+    // The full stop belongs to the Arabic sentence; without the isolate it renders at
+    // the left of the Latin name, which reads as a stray dot starting the next line.
+    text: 'إعلانات الكورسات الجديدة، مواعيد الإطلاق ونصائح تقنية، كلها في قناة ⁨GloryTech Academy⁩.',
     cta: 'انضم الآن',
   },
   contact: {
@@ -292,7 +294,7 @@ const ar = {
     failTitle: 'تعذّر تشغيل الفيديو',
     failText: 'تحقق من اتصالك بالإنترنت ثم أعد المحاولة.',
     preparing: 'جارٍ تجهيز المحاضرة… قد يستغرق ذلك لحظات عند أول تشغيل.',
-    codecWarning: 'الصوت يعمل والصورة لا تظهر لأن متصفحك لا يدعم ترميز هذا المقطع (H.265). جرّب متصفح Edge أو Safari، أو أبلغنا لنعيد رفع المحاضرة بترميز H.264.',
+    codecWarning: 'الصوت يعمل والصورة لا تظهر لأن متصفحك لا يدعم ترميز هذا المقطع (H.265). جرّب متصفح Edge أو Safari، أو أبلغنا لنعيد رفع المحاضرة بترميز ⁨H.264⁩.',
     play: 'تشغيل',
     pause: 'إيقاف مؤقت',
     back10: 'رجوع 10 ثوانٍ',
@@ -447,7 +449,7 @@ const ar = {
     videoHint: 'ارفع الفيديو إلى Google Drive، واضبط مشاركته على «أي شخص لديه الرابط»، ثم الصق الرابط هنا.',
     videoLinked: 'الفيديو مرتبط',
     videoMissing: 'لا يوجد فيديو',
-    videoInvalid: 'الرابط غير صالح. الصق رابط ملف من Google Drive.',
+    videoInvalid: 'الرابط غير صالح. الصق رابط ملف من ⁨Google Drive⁩.',
     removeVideo: 'إزالة الفيديو',
     resourcesTitle: 'المرفقات',
     addResource: 'إضافة مرفق',

@@ -15,14 +15,14 @@ export default function InstructorCard({ instructor }) {
   const extra = others.length - shown.length;
 
   return (
-    <article className="grid overflow-hidden rounded-[2rem] border border-line bg-surface shadow-[0_12px_40px_rgba(15,26,21,.06)] md:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
+    <article className="grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-[2rem] border border-line bg-surface shadow-[0_12px_40px_rgba(15,26,21,.06)] md:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
       <Link to={`/instructors/${instructor.slug}`} className="relative block min-h-[22rem] overflow-hidden bg-gradient-to-b from-brand-soft to-subtle">
         <div className="absolute inset-x-10 bottom-0 top-16 rounded-t-full bg-glory-500/15" />
         <img src={instructor.photo} alt={pick(instructor, 'name')} className="absolute inset-0 h-full w-full object-contain object-bottom" />
       </Link>
 
-      <div className="flex flex-col p-7 sm:p-9">
-        <h3 className="text-2xl font-black leading-snug">{pick(instructor, 'name')}</h3>
+      <div className="flex min-w-0 flex-col p-6 sm:p-9">
+        <h3 className="text-balance text-xl font-black leading-snug sm:text-2xl">{pick(instructor, 'name')}</h3>
         <p className="mt-1 font-bold text-brand-ink">{pick(instructor, 'title')}</p>
         <p className="mt-4 line-clamp-4 text-sm font-medium leading-7 text-muted">{pick(instructor, 'bio')}</p>
 
