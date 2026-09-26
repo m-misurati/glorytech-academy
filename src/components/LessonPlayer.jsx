@@ -49,7 +49,11 @@ export default function LessonPlayer({ lesson, course, startAt = 0, onProgress }
       return undefined;
     }
     setPlayback({ status: 'loading' });
-    requestLessonPlayback(lesson.id).then((result) => { if (active) setPlayback(result); });
+    requestLessonPlayback(lesson.id).then((result) => {
+      if (active) {
+        setPlayback(result.status === 'ready' ? { ...result, url: `${result.url}?r=${Date.now()}` } : result);
+      }
+    });
     return () => { active = false; };
   }, [lesson?.id, user?.id, isDemo]);
 

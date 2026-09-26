@@ -160,7 +160,7 @@ function partialResponse(request, media, body, start, end, total, length) {
   headers.set('Accept-Ranges', 'bytes')
   headers.set('Content-Disposition', 'inline')
   // Signed per learner, so the browser may keep it but shared caches may not.
-  headers.set('Cache-Control', 'private, max-age=3600')
+  headers.set('Cache-Control', 'private, no-cache')
   headers.set('X-Content-Type-Options', 'nosniff')
   return new Response(request.method === 'HEAD' ? null : body, { status: 206, headers })
 }
@@ -246,7 +246,7 @@ function streamHeaders(headers, media, upstream) {
   headers.set('Content-Type', media.mimeType || upstream.headers.get('Content-Type') || 'video/mp4')
   headers.set('Content-Disposition', 'inline')
   headers.set('Accept-Ranges', 'bytes')
-  headers.set('Cache-Control', 'private, max-age=3600')
+  headers.set('Cache-Control', 'private, no-cache')
   headers.set('X-Content-Type-Options', 'nosniff')
   return headers
 }

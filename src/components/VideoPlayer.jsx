@@ -63,6 +63,13 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
     // video at a time, so arming it there blanks the lesson and leaves only sound.
     // Safari fires mousemove on a tap, so the pointer type decides, not the event.
     hoverPointer.current = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ?? true;
+    // An iPhone treats a video playing inside the page as ambient sound, so the ringer
+    // switch silences the lecture while the picture keeps running -- and the learner
+    // has no way to tell. Declaring the page a media player makes iOS route it to the
+    // speaker regardless of that switch, the same as the native fullscreen player.
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';
+    } catch { /* Safari before 17, and every other browser: nothing to declare */ }
   }, []);
 
   useEffect(() => {
@@ -262,11 +269,6 @@ export default function VideoPlayer({ src, title, onEnded, onRetry, startAt = 0,
         controlsList="nodownload noremoteplayback"
         disablePictureInPicture
         onClick={togglePlay}
-        onVolumeChange={(event) => {
-          const video = event.currentTarget;
-          setMuted(video.muted || video.volume === 0);
-          setVolume(video.volume);
-        }}
         onPlay={() => { setPlaying(true); revealControls(); }}
         onPause={(event) => { setPlaying(false); setControlsVisible(true); onProgress?.(event.currentTarget.currentTime); }}
         onWaiting={() => setWaiting(true)}
