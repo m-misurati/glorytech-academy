@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCatalog } from '../context/CatalogContext';
 import { useI18n } from '../i18n/I18nContext';
 import CourseBadge from './CourseBadge';
+import LinkedInIcon from './LinkedInIcon';
 
 export default function InstructorCard({ instructor }) {
   const { t, pick } = useI18n();
@@ -24,6 +25,16 @@ export default function InstructorCard({ instructor }) {
       <div className="flex min-w-0 flex-col p-6 sm:p-9">
         <h3 className="text-balance text-xl font-black leading-snug sm:text-2xl">{pick(instructor, 'name')}</h3>
         <p className="mt-1 font-bold text-brand-ink">{pick(instructor, 'title')}</p>
+        {instructor.linkedin && (
+          <a
+            href={instructor.linkedin}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-flex w-fit items-center gap-2 rounded-full border border-line px-3 py-1.5 text-xs font-black text-muted transition hover:border-[#0a66c2] hover:text-[#0a66c2]"
+          >
+            <LinkedInIcon className="h-4 w-4 text-[#0a66c2]" /> {t('instructors.linkedin')}
+          </a>
+        )}
         <p className="mt-4 line-clamp-4 text-sm font-medium leading-7 text-muted">{pick(instructor, 'bio')}</p>
 
         {instructor.certifications.length > 0 && (

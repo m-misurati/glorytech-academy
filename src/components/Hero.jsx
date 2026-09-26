@@ -28,7 +28,7 @@ export default function Hero() {
           <p className="mt-6 max-w-xl text-lg font-medium leading-9 text-muted">{t('hero.intro')}</p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link to={{ pathname: '/', hash: '#courses' }} className="btn-primary px-7 py-4 shadow-lg shadow-glory-900/10">
+            <Link to="/login?mode=signup" className="btn-primary px-7 py-4 shadow-lg shadow-glory-900/10">
               {t('hero.ctaPrimary')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" />
             </Link>
             <a href={site.telegramUrl} target="_blank" rel="noreferrer" className="btn-secondary px-7 py-4">

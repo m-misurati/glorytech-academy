@@ -5,7 +5,7 @@ import { getFirstLesson } from '../data/courses';
 import { useI18n } from '../i18n/I18nContext';
 import CourseBadge from './CourseBadge';
 
-export default function CourseCard({ course, dashboard = false, progress = 0 }) {
+export default function CourseCard({ course, dashboard = false }) {
   const { t, pick, formatMinutes, formatMoney } = useI18n();
   const { getInstructor } = useCatalog();
   const instructor = getInstructor(course.instructorId);
@@ -50,18 +50,6 @@ export default function CourseCard({ course, dashboard = false, progress = 0 }) 
             <strong className="font-black text-brand-ink">{course.isFree ? t('courses.freePrice') : formatMoney(course.price)}</strong>
           </span>
         </div>
-
-        {dashboard && (
-          <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between text-[11px] font-black">
-              <span className="text-muted">{t('courses.progress')}</span>
-              <span className="text-brand-ink">{progress}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-subtle">
-              <div className="h-full rounded-full bg-brand" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        )}
 
         <div className="mt-auto pt-5">
           {/* Stretched link: one target covering the card, so a click anywhere opens the course. */}

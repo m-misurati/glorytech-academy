@@ -24,12 +24,6 @@ export default function DashboardPage() {
   // Nothing marks a lesson complete any more -- the courses are free and open -- so
   // what counts is the lessons the learner has actually started watching.
   const watchedIds = useMemo(() => new Set(progressRows.filter((row) => (row.progress_seconds || 0) > 0).map((row) => row.lesson_id)), [progressRows]);
-  const courseProgress = useMemo(() => Object.fromEntries(availableCourses.map((course) => {
-    const lessons = getAllLessons(course);
-    const done = lessons.filter((lesson) => watchedIds.has(lesson.id)).length;
-    return [course.id, lessons.length ? Math.round((done / lessons.length) * 100) : 0];
-  })), [availableCourses, watchedIds]);
-
   const contentHours = Math.floor(availableCourses.reduce((total, course) => total + (course.durationMinutes || 0), 0) / 60);
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || t('student.fallbackName');
   const stats = [
@@ -83,7 +77,7 @@ export default function DashboardPage() {
           <span className="text-sm font-bold text-muted">{t('student.countNow', { count: availableCourses.length })}</span>
         </div>
         <div className="mt-7 grid gap-7 lg:grid-cols-2">
-          {availableCourses.map((course) => <CourseCard key={course.id} course={course} dashboard progress={courseProgress[course.id] || 0} />)}
+          {availableCourses.map((course) => <CourseCard key={course.id} course={course} dashboard />)}
         </div>
       </main>
     </div>

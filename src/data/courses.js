@@ -13,6 +13,7 @@ export const instructors = [
     bio: "مهندس شبكات وحوسبة سحابية بخبرة ميدانية في تصميم وتشغيل شبكات المشغّلين والمؤسسات، نفّذ مشاريع عديدة في الربط والأمن والبنية السحابية والافتراضية. حاصل على CCIE Enterprise Infrastructure وعدد كبير من شهادات Cisco و VMware و Fortinet و Microsoft، ودرّب آلاف الطلبة والمهندسين في دورات عملية تبدأ من الأساسيات وتصل إلى مستوى الاحتراف، بأمثلة من قلب بيئة العمل.",
     bioEn: "A network and cloud engineer with field experience designing and running carrier and enterprise networks, delivered across connectivity, security, cloud and virtualization projects. He holds CCIE Enterprise Infrastructure along with a long list of Cisco, VMware, Fortinet and Microsoft certifications, and has trained thousands of students and engineers in hands-on courses that start from the fundamentals and reach professional level, with examples straight from real work.",
     photo: '/assets/mohamed-bashir-cutout.png',
+    linkedin: 'https://www.linkedin.com/in/mohamed-bashir-misurati/',
     expertise: ["الشبكات","أمن الشبكات","الحوسبة السحابية","الافتراضية","أتمتة الشبكات"],
     expertiseEn: ["Networking","Network security","Cloud computing","Virtualization","Network automation"],
     certifications: [

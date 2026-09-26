@@ -1,5 +1,6 @@
 import { ArrowRight, BadgeCheck, BookOpen, Sparkles } from 'lucide-react';
 import { Link, Navigate, useParams } from 'react-router-dom';
+import LinkedInIcon from '../components/LinkedInIcon';
 import CourseCard from '../components/CourseCard';
 import SiteFooter from '../components/SiteFooter';
 import SiteHeader from '../components/SiteHeader';
@@ -37,6 +38,16 @@ export default function InstructorPage() {
               <span className="section-tag mt-6 flex w-fit">{t('instructors.about')}</span>
               <h1 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">{pick(instructor, 'name')}</h1>
               <p className="mt-3 text-lg font-bold text-brand-ink">{pick(instructor, 'title')}</p>
+              {instructor.linkedin && (
+                <a
+                  href={instructor.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-black text-muted transition hover:border-[#0a66c2] hover:text-[#0a66c2]"
+                >
+                  <LinkedInIcon className="h-4 w-4 text-[#0a66c2]" /> {t('instructors.linkedin')}
+                </a>
+              )}
               <p className="mt-6 max-w-2xl text-lg font-medium leading-9 text-muted">{pick(instructor, 'bio')}</p>
               {expertise.length > 0 && (
                 <div className="mt-6">

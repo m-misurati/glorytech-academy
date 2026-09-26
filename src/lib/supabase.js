@@ -84,7 +84,18 @@ export async function requestLessonPlayback(lessonId) {
 }
 
 const COURSE_COLUMNS = 'id, slug, code, title, title_en, short_title, short_title_en, description, description_en, level, level_en, outcomes, outcomes_en, duration_minutes, is_free, price, availability_status, cover_url, instructor_id, position';
-const INSTRUCTOR_COLUMNS = 'id, slug, name, name_en, title, title_en, bio, bio_en, photo_url, expertise, expertise_en, certifications, position';
+const INSTRUCTOR_BASE_COLUMNS = 'id, slug, name, name_en, title, title_en, bio, bio_en, photo_url, expertise, expertise_en, certifications, position';
+const INSTRUCTOR_COLUMNS = `${INSTRUCTOR_BASE_COLUMNS}, linkedin_url`;
+
+// linkedin_url arrived in a later migration. Asking for a column the database does not
+// have yet fails the whole catalogue, so the query falls back to the older shape and
+// the site keeps working until the migration is applied.
+async function loadInstructors() {
+  const withLink = await supabase.from('instructors').select(INSTRUCTOR_COLUMNS).eq('is_active', true).order('position');
+  if (!withLink.error) return withLink;
+  if (withLink.error.code !== '42703') return withLink;
+  return supabase.from('instructors').select(INSTRUCTOR_BASE_COLUMNS).eq('is_active', true).order('position');
+}
 
 function mapInstructor(row) {
   return {
@@ -97,6 +108,7 @@ function mapInstructor(row) {
     bio: row.bio,
     bioEn: row.bio_en,
     photo: row.photo_url,
+    linkedin: row.linkedin_url || '',
     expertise: row.expertise || [],
     expertiseEn: row.expertise_en || [],
     certifications: row.certifications || [],
@@ -112,7 +124,7 @@ export async function getPublishedCatalog() {
     supabase.from('courses').select(COURSE_COLUMNS).eq('is_published', true).order('position'),
     supabase.from('modules').select('id, course_id, title, title_en, position').order('position'),
     supabase.from('lessons').select('id, course_id, module_id, title, title_en, duration_seconds, position, is_preview, telegram_message_id').order('position'),
-    supabase.from('instructors').select(INSTRUCTOR_COLUMNS).eq('is_active', true).order('position'),
+    loadInstructors(),
   ]);
 
   const error = coursesResult.error || modulesResult.error || lessonsResult.error || instructorsResult.error;
