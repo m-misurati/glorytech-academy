@@ -113,7 +113,7 @@ export const lessonMedia = {
   // Module-1 WAN Concepts
   '00000000-0000-4000-8000-000000001201': {
     provider: 'google_drive',
-    driveFileId: '1wS8t7Nq7cZFk0fZVTYrq_VK6mO-GIb2f',
+    driveFileId: '1z1ZQmaM6HJTVw4yMaF0EruFDQMNjP-k1',
     mimeType: 'video/mp4',
   },
   // Module-2 VPN and IPsec Concepts
