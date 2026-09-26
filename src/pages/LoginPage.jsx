@@ -73,10 +73,11 @@ export default function LoginPage() {
         if (profile.displayName.trim().length < 2) throw new FormError(t('login.errorName'));
         const phoneDigits = cleanPhone.replace(/\D/g, '');
         if (!/^[+\d][\d\s()-]{6,19}$/.test(cleanPhone) || phoneDigits.length < 7 || phoneDigits.length > 15) throw new FormError(t('login.errorPhone'));
+        if (profile.affiliation.trim().length < 2) throw new FormError(t('login.errorAffiliation'));
         nextProfile = {
           displayName: profile.displayName.trim(),
           phone: cleanPhone,
-          affiliation: profile.affiliation.trim() || null,
+          affiliation: profile.affiliation.trim(),
         };
       }
 
@@ -165,8 +166,8 @@ export default function LoginPage() {
                         <span className="field"><Phone className="h-5 w-5 text-muted" /><input dir="ltr" value={profile.phone} onChange={(event) => setProfile((value) => ({ ...value, phone: event.target.value }))} type="tel" inputMode="tel" autoComplete="tel" required minLength={7} maxLength={20} placeholder="+218 9X XXX XXXX" className="text-left font-inter" /></span>
                       </label>
                       <label className="block">
-                        <span className="mb-2 block text-sm font-black">{t('login.affiliation')} <span className="font-bold text-muted">{t('login.optional')}</span></span>
-                        <span className="field"><Building2 className="h-5 w-5 text-muted" /><input value={profile.affiliation} onChange={(event) => setProfile((value) => ({ ...value, affiliation: event.target.value }))} autoComplete="organization" maxLength={120} placeholder={t('login.affiliationPlaceholder')} /></span>
+                        <span className="mb-2 block text-sm font-black">{t('login.affiliation')}</span>
+                        <span className="field"><Building2 className="h-5 w-5 text-muted" /><input value={profile.affiliation} onChange={(event) => setProfile((value) => ({ ...value, affiliation: event.target.value }))} autoComplete="organization" required minLength={2} maxLength={120} placeholder={t('login.affiliationPlaceholder')} /></span>
                       </label>
                     </>
                   )}
