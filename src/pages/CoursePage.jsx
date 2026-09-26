@@ -20,7 +20,7 @@ export default function CoursePage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [enrollError, setEnrollError] = useState('');
-  const [completedIds, setCompletedIds] = useState(new Set());
+  const [lastWatchedId, setLastWatchedId] = useState('');
   const course = getCourseBySlug(slug);
   const lessonList = useMemo(() => getAllLessons(course), [course]);
   usePageMeta({ title: course ? pick(course, 'title') : undefined, description: course ? pick(course, 'description') : undefined });
@@ -28,7 +28,11 @@ export default function CoursePage() {
   useEffect(() => {
     let active = true;
     getUserProgress(user?.id).then(({ data }) => {
-      if (active && data) setCompletedIds(new Set(data.filter((row) => row.completed_at).map((row) => row.lesson_id)));
+      // Pick up where the learner actually stopped, not the first lesson they never ticked.
+      if (!active || !data) return;
+      const watched = data.filter((row) => (row.progress_seconds || 0) > 0)
+        .sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
+      setLastWatchedId(watched[0]?.lesson_id || '');
     });
     return () => { active = false; };
   }, [user?.id]);
@@ -38,7 +42,7 @@ export default function CoursePage() {
 
   const instructor = getInstructor(course.instructorId);
   const lessons = lessonList;
-  const nextLesson = lessons.find((item) => !completedIds.has(item.id)) || lessons[0];
+  const nextLesson = lessons.find((item) => item.id === lastWatchedId) || lessons[0];
   const title = pick(course, 'title');
   const duration = formatMinutes(course.durationMinutes);
 

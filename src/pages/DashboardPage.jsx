@@ -21,18 +21,20 @@ export default function DashboardPage() {
     return () => { active = false; };
   }, [user?.id]);
 
-  const completedIds = useMemo(() => new Set(progressRows.filter((row) => row.completed_at).map((row) => row.lesson_id)), [progressRows]);
+  // Nothing marks a lesson complete any more -- the courses are free and open -- so
+  // what counts is the lessons the learner has actually started watching.
+  const watchedIds = useMemo(() => new Set(progressRows.filter((row) => (row.progress_seconds || 0) > 0).map((row) => row.lesson_id)), [progressRows]);
   const courseProgress = useMemo(() => Object.fromEntries(availableCourses.map((course) => {
     const lessons = getAllLessons(course);
-    const done = lessons.filter((lesson) => completedIds.has(lesson.id)).length;
+    const done = lessons.filter((lesson) => watchedIds.has(lesson.id)).length;
     return [course.id, lessons.length ? Math.round((done / lessons.length) * 100) : 0];
-  })), [availableCourses, completedIds]);
+  })), [availableCourses, watchedIds]);
 
   const contentHours = Math.floor(availableCourses.reduce((total, course) => total + (course.durationMinutes || 0), 0) / 60);
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || t('student.fallbackName');
   const stats = [
     { icon: BookOpen, value: formatNumber(availableCourses.length), label: t('student.courses') },
-    { icon: CheckCircle2, value: formatNumber(completedIds.size), label: t('student.completed') },
+    { icon: CheckCircle2, value: formatNumber(watchedIds.size), label: t('student.watched') },
     { icon: Clock3, value: formatNumber(contentHours), label: t('student.content') },
   ];
   const roleLinks = [

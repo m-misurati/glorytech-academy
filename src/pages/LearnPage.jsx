@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, CheckCircle2, Menu, X } from 'lucide-react';
+import { ArrowRight, Menu, X } from 'lucide-react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import CourseBadge from '../components/CourseBadge';
 import LessonPlayer from '../components/LessonPlayer';
@@ -10,7 +10,7 @@ import { useCatalog } from '../context/CatalogContext';
 import { getAllLessons } from '../data/courses';
 import { useI18n } from '../i18n/I18nContext';
 import { usePageMeta } from '../lib/meta';
-import { enrollInCourse, getLessonResources, getUserProgress, saveLessonPosition, saveLessonProgress } from '../lib/supabase';
+import { enrollInCourse, getLessonResources, getUserProgress, saveLessonPosition } from '../lib/supabase';
 
 export default function LearnPage() {
   const { slug, lessonId } = useParams();
@@ -18,10 +18,7 @@ export default function LearnPage() {
   const { t, pick, formatClock } = useI18n();
   const { user, isDemo } = useAuth();
   const navigate = useNavigate();
-  const [completed, setCompleted] = useState(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [progressError, setProgressError] = useState('');
   const [positions, setPositions] = useState({});
   const [resources, setResources] = useState([]);
   const course = getCourseBySlug(slug);
@@ -36,13 +33,10 @@ export default function LearnPage() {
     let active = true;
     getUserProgress(user?.id).then(({ data }) => {
       if (!active || !data) return;
-      setCompleted(new Set(data.filter((row) => row.completed_at).map((row) => row.lesson_id)));
       setPositions(Object.fromEntries(data.map((row) => [row.lesson_id, row.progress_seconds || 0])));
     });
     return () => { active = false; };
   }, [user?.id]);
-
-  useEffect(() => { setProgressError(''); }, [lessonId]);
 
   // Opening any lesson of a free course enrolls the learner first, so a lesson
   // reached straight from the course page (or right after sign-up) can play.
@@ -68,20 +62,9 @@ export default function LearnPage() {
 
   if (!course || course.availability === 'coming_soon' || !lesson) return <Navigate to="/404" replace />;
 
-  const markComplete = async () => {
-    setSaving(true);
-    setProgressError('');
-    const { error } = await saveLessonProgress({ userId: user.id, lessonId: lesson.id, completed: true });
-    setSaving(false);
-    if (error) {
-      setProgressError(t('learn.progressError'));
-      return;
-    }
-    setCompleted((current) => new Set([...current, lesson.id]));
-    if (nextLesson) navigate(`/learn/${course.slug}/${nextLesson.id}`);
-  };
-
-  const isDone = completed.has(lesson.id);
+  // The courses are free and open, so there is nothing to tick off: the button only
+  // moves the learner on. Where they stopped in the video is still saved, so the
+  // lesson resumes where they left it.
   const clock = formatClock(lesson.durationSeconds);
 
   return (
@@ -145,16 +128,13 @@ export default function LearnPage() {
                 <h1 dir="ltr" className="mt-2 text-start font-inter text-2xl font-black sm:text-3xl rtl:text-right">{pick(lesson, 'title')}</h1>
                 {clock && <p className="mt-3 text-sm font-medium text-muted">{t('learn.duration', { value: clock })}</p>}
               </div>
-              <button type="button" disabled={saving || isDone} onClick={markComplete} className={`btn-primary shrink-0 ${isDone ? '!bg-brand-soft !text-brand-ink disabled:opacity-100' : ''}`}>
-                {isDone
-                  ? <><CheckCircle2 className="h-5 w-5" /> {t('learn.completed')}</>
-                  : saving
-                    ? t('common.saving')
-                    : <>{nextLesson ? t('learn.completeNext') : t('learn.completeCourse')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" /></>}
-              </button>
+              {nextLesson && (
+                <button type="button" onClick={() => navigate(`/learn/${course.slug}/${nextLesson.id}`)} className="btn-primary shrink-0">
+                  {t('learn.next')} <ArrowRight className="h-5 w-5 rtl:-scale-x-100" />
+                </button>
+              )}
             </div>
             {isDemo && <p className="mt-7 rounded-xl border border-glory-500/30 bg-brand-soft px-4 py-3 text-xs font-bold text-brand-ink">{t('learn.demoNote')}</p>}
-            {progressError && <p className="mt-7 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-700 dark:text-red-300" role="alert">{progressError}</p>}
             <div className="mt-8">
               <LessonResources resources={resources} title={t('learn.resources')} emptyText={t('learn.noResources')} />
             </div>
