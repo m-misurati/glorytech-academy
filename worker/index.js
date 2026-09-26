@@ -257,6 +257,9 @@ const mediaCache = new Map()
 const MEDIA_CACHE_MS = 5 * 60 * 1000
 
 async function lookupMedia(env, lessonId) {
+  // If explicitly mapped in worker/media.js, use it as the primary authoritative source:
+  if (lessonMedia[lessonId]) return lessonMedia[lessonId]
+
   const cached = mediaCache.get(lessonId)
   if (cached && cached.expires > Date.now()) return cached.media
 
@@ -279,7 +282,6 @@ async function lookupMedia(env, lessonId) {
     }
   }
 
-  if (!media) media = lessonMedia[lessonId] || null
   mediaCache.set(lessonId, { media, expires: Date.now() + MEDIA_CACHE_MS })
   return media
 }
