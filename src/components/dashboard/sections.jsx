@@ -201,8 +201,28 @@ export function LearnersTable({ learners, admin = false }) {
         </div>
       ),
     },
-    { key: 'course', header: t('dash.col.course'), render: (row) => <span className="font-inter text-xs font-black text-brand-ink">{row.course_code}</span> },
-    { key: 'progress', header: t('dash.col.progress'), render: (row) => <ProgressBar value={Number(row.progress) || 0} /> },
+    {
+      key: 'course',
+      header: t('dash.col.course'),
+      render: (row) => (
+        <div className="space-y-1">
+          {(row.courses || []).map((course) => (
+            <span key={course.course_id} className="block whitespace-nowrap font-inter text-xs font-black text-brand-ink">{course.course_code}</span>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: 'progress',
+      header: t('dash.col.progress'),
+      render: (row) => (
+        <div className="min-w-32 space-y-1">
+          {(row.courses || []).map((course) => (
+            <ProgressBar key={course.course_id} value={course.progress} />
+          ))}
+        </div>
+      ),
+    },
     { key: 'enrolled', header: t('dash.col.enrolled'), numeric: true, render: (row) => formatDate(row.enrolled_at) },
     { key: 'last', header: t('dash.col.lastActivity'), numeric: true, render: (row) => formatDate(row.last_activity) },
   ].filter(Boolean);
@@ -302,7 +322,28 @@ export function InstructorsTable({ instructors, onPayout }) {
   return <DataTable columns={columns} rows={instructors} empty="—" />;
 }
 
+// SQL returns one row per enrolment, so anyone taking both courses appeared twice.
+// One row per person, carrying each of their courses and how far they got in it.
 export function withLearnerKeys(learners) {
-  return (learners || []).map((row) => ({ ...row, __key: `${row.user_id}-${row.course_id}` }));
+  const byLearner = new Map();
+  for (const row of learners || []) {
+    const existing = byLearner.get(row.user_id);
+    const course = {
+      course_id: row.course_id,
+      course_code: row.course_code,
+      course_title: row.course_title,
+      course_title_en: row.course_title_en,
+      progress: Number(row.progress) || 0,
+    };
+    if (!existing) {
+      byLearner.set(row.user_id, { ...row, __key: row.user_id, courses: [course] });
+      continue;
+    }
+    existing.courses.push(course);
+    // Show when they first joined, and the most recent sign of life across every course.
+    if (row.enrolled_at < existing.enrolled_at) existing.enrolled_at = row.enrolled_at;
+    if ((row.last_activity || '') > (existing.last_activity || '')) existing.last_activity = row.last_activity;
+  }
+  return [...byLearner.values()];
 }
 
